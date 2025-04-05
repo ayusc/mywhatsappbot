@@ -1,17 +1,22 @@
-import { Client, LocalAuth } from 'whatsapp-web.js';
-import qrcode from 'qrcode-terminal';
+import { Client, LegacySessionAuth } from 'whatsapp-web.js';
+import dotenv from 'dotenv';
 import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { getSession, saveSession } from './session-store.js';
-import pkg from 'whatsapp-web.js';
-const { LegacySessionAuth } = pkg;
 
-// Helper for __dirname in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+dotenv.config();
 
-// Load all modules
+// Parse session from env
+function getSessionFromEnv() {
+  try {
+    const raw = process.env.WHATSAPP_SESSION;
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (err) {
+    console.error('❌ Invalid WHATSAPP_SESSION format');
+    return null;
+  }
+}
+
+// Load modules
 const modules = [];
 const moduleFiles = fs.readdirSync('./modules').filter(file => file.endsWith('.js'));
 for (const file of moduleFiles) {
@@ -19,33 +24,17 @@ for (const file of moduleFiles) {
   modules.push(mod.default);
 }
 
-// Load session from PostgreSQL
-const savedSession = await getSession();
-
 const client = new Client({
   authStrategy: new LegacySessionAuth({
-    session: savedSession
+    session: getSessionFromEnv()
   }),
   puppeteer: {
     args: ['--no-sandbox']
   }
 });
 
-client.on('qr', (qr) => {
-  qrcode.generate(qr, { small: true });
-});
-
-client.on('authenticated', async (session) => {
-  console.log('Authenticated!');
-  await saveSession(session);
-});
-
-client.on('auth_failure', msg => {
-  console.error('AUTH FAILED', msg);
-});
-
 client.on('ready', () => {
-  console.log('Client is ready!');
+  console.log('🤖 WhatsApp userbot is ready!');
 });
 
 client.on('message', async message => {
