@@ -1,46 +1,28 @@
-import { Client, LegacySessionAuth } from 'whatsapp-web.js';
+import { createCanvas } from 'canvas';
+import qrcode from 'qrcode';
+import axios from 'axios';
 import dotenv from 'dotenv';
-import fs from 'fs';
 
 dotenv.config();
 
-// Parse session from env
-function getSessionFromEnv() {
-  try {
-    const raw = process.env.WHATSAPP_SESSION;
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch (err) {
-    console.error('❌ Invalid WHATSAPP_SESSION format');
-    return null;
-  }
-}
+client.on('qr', async (qr) => {
+  console.log('Generating QR Code...');
 
-// Load modules
-const modules = [];
-const moduleFiles = fs.readdirSync('./modules').filter(file => file.endsWith('.js'));
-for (const file of moduleFiles) {
-  const mod = await import(`./modules/${file}`);
-  modules.push(mod.default);
-}
+  // Generate base64 PNG
+  const canvas = createCanvas(300, 300);
+  await qrcode.toCanvas(canvas, qr);
+  const dataUrl = canvas.toDataURL('image/png');
+  const base64 = dataUrl.replace(/^data:image\/png;base64,/, '');
 
-const client = new Client({
-  authStrategy: new LegacySessionAuth({
-    session: getSessionFromEnv()
-  }),
-  puppeteer: {
-    args: ['--no-sandbox']
-  }
+  // Upload to imgbb
+  const imgbbRes = await axios.post('https://api.imgbb.com/1/upload', null, {
+    params: {
+      key: process.env.IMGBB_API_KEY,
+      image: base64,
+      name: `whatsapp-qr-${Date.now()}`
+    }
+  });
+
+  console.log('📸 Scan the QR from this link:');
+  console.log(imgbbRes.data.data.url);
 });
-
-client.on('ready', () => {
-  console.log('🤖 WhatsApp userbot is ready!');
-});
-
-client.on('message', async message => {
-  for (const mod of modules) {
-    await mod.execute(client, message);
-  }
-});
-
-client.initialize();
