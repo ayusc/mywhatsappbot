@@ -4,9 +4,10 @@ const axios = require('axios');
 const AdmZip = require('adm-zip');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
+const chrome = require('chrome-aws-lambda');
 
 const sessionUrl = 'https://drive.google.com/uc?export=download&id=1ynJ78dI4HFWwYWof76id4Oujkk92xUmd';
-console.log('DRIVE_SESSION_URL =', process.env.DRIVE_SESSION_URL);
+//console.log('DRIVE_SESSION_URL =', process.env.DRIVE_SESSION_URL);
 const sessionZipPath = path.join(__dirname, 'session.zip');
 const sessionFolder = path.join(__dirname, '.wwebjs_auth');
 const modulesPath = path.join(__dirname, 'modules');
@@ -48,10 +49,12 @@ async function startBot() {
     extractSession();
 
     const client = new Client({
-    authStrategy: new LocalAuth(),
-    puppeteer: {
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-    }
+      authStrategy: new LocalAuth(),
+      puppeteer: {
+        executablePath: await chrome.executablePath,
+        args: chrome.args,
+        headless: chrome.headless,
+      }
     });
 
 
