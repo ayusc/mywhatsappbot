@@ -1,28 +1,50 @@
-import { createCanvas } from 'canvas';
-import qrcode from 'qrcode';
-import axios from 'axios';
-import dotenv from 'dotenv';
+const { Client, LocalAuth } = require('whatsapp-web.js');
+const fs = require('fs');
+const path = require('path');
 
-dotenv.config();
+// Optional: Restore LocalAuth from base64-encoded LOCALAUTH_DATA
+const localAuthPath = './.wwebjs_auth';
+if (process.env.LOCALAUTH_DATA) {
+    const decoded = Buffer.from(process.env.LOCALAUTH_DATA, 'base64');
+    fs.mkdirSync(localAuthPath, { recursive: true });
+    fs.writeFileSync(path.join(localAuthPath, 'session'), decoded);
+}
 
-client.on('qr', async (qr) => {
-  console.log('Generating QR Code...');
-
-  // Generate base64 PNG
-  const canvas = createCanvas(300, 300);
-  await qrcode.toCanvas(canvas, qr);
-  const dataUrl = canvas.toDataURL('image/png');
-  const base64 = dataUrl.replace(/^data:image\/png;base64,/, '');
-
-  // Upload to imgbb
-  const imgbbRes = await axios.post('https://api.imgbb.com/1/upload', null, {
-    params: {
-      key: process.env.IMGBB_API_KEY,
-      image: base64,
-      name: `whatsapp-qr-${Date.now()}`
+// Initialize WhatsApp client
+const client = new Client({
+    authStrategy: new LocalAuth({
+        dataPath: localAuthPath.replace('./', ''),
+    }),
+    puppeteer: {
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
     }
-  });
-
-  console.log('📸 Scan the QR from this link:');
-  console.log(imgbbRes.data.data.url);
 });
+
+// Event: Ready
+client.on('ready', () => {
+    console.log('✅ WhatsApp bot is ready!');
+});
+
+// Event: Message
+client.on('message', async (msg) => {
+    if (msg.body.toLowerCase() === 'hi') {
+        await msg.reply('Hello! 👋');
+    }
+
+    // Load modules dynamically from modules folder
+    const modulesPath = path.join(__dirname, 'modules');
+    if (fs.existsSync(modulesPath)) {
+        const files = fs.readdirSync(modulesPath);
+        for (const file of files) {
+            if (file.endsWith('.js')) {
+                const module = require(path.join(modulesPath, file));
+                if (typeof module === 'function') {
+                    await module(client, msg);
+                }
+            }
+        }
+    }
+});
+
+// Start client
+client.initialize();
