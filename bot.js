@@ -48,12 +48,12 @@ async function startBot() {
     extractSession();
 
     const client = new Client({
-        authStrategy: new LocalAuth({ dataPath: sessionFolder }),
-        puppeteer: {
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        }
+    authStrategy: new LocalAuth(),
+    puppeteer: {
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    }
     });
+
 
     client.on('qr', (qr) => {
         console.log('⚠️  QR Required:\n');
