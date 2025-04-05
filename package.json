@@ -10,6 +10,5 @@
     "whatsapp-web.js": "^1.22.1",
     "pg": "^8.11.1",
     "dotenv": "^16.3.1",
-    "qrcode-terminal": "^0.12.0"
   }
 }
