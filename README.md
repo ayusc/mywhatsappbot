@@ -1,6 +1,6 @@
 # WhatsApp Userbot
 
-A WhatsApp userbot using `whatsapp-web.js` with persistent session via PostgreSQL. Designed to run on Railway (free tier).
+A simple WhatsApp userbot using `whatsapp-web.js` with persistent session via PostgreSQL. Designed to run on Railway (free tier).
 
 ## Features
 - Persistent login (no QR after first time)
