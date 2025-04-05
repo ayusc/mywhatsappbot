@@ -19,6 +19,7 @@ const client = new Client({
   authStrategy: new RemoteAuth({
     store: store,
     clientId: "ayus-bot",
+    backupSyncIntervalMs: 60000, 
   }),
   puppeteer: {
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
