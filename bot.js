@@ -4,27 +4,25 @@ const qrcode = require('qrcode-terminal');
 const PostgresStore = require('./postgres-store');
 const fs = require('fs');
 const path = require('path');
+const puppeteer = require('puppeteer');
 
 (async () => {
     const store = new PostgresStore({ session: process.env.SESSION_ID });
     await store.init();
 
-    const puppeteer = require('puppeteer');
-
     const client = new Client({
-    authStrategy: new RemoteAuth({
-        clientId: process.env.SESSION_ID,
+        authStrategy: new RemoteAuth({
         store,
-        backupSyncIntervalMs: 60000,
-    }),
-    puppeteer: {
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        executablePath: puppeteer.executablePath(), // this line ensures it uses the bundled Chromium
-        },
+        backupSyncIntervalMs: 120000
+      }),
+      puppeteer: {
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      }
     });
     
     client.on('qr', (qr) => {
-        console.log('📲 Scan this QR code to log in:');
+        console.log('📲 Scan this QR code to log in:\n');
         qrcode.generate(qr, { small: true });
     });
 
