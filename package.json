@@ -15,8 +15,8 @@
   "author": "Ayus Chatterjee",
   "license": "MIT",
   "dependencies": {
-    "qrcode-terminal": "latest",
-    "tar": "latest",
+    "axios": "^1.6.8",
+    "adm-zip": "^0.5.10",
     "whatsapp-web.js": "latest"
   }
 }
