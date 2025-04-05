@@ -1,14 +1,22 @@
 {
   "name": "whatsapp-userbot",
   "version": "1.0.0",
-  "main": "index.js",
-  "type": "module",
+  "description": "A modular WhatsApp userbot using whatsapp-web.js",
+  "main": "bot.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node bot.js"
   },
+  "keywords": [
+    "whatsapp",
+    "bot",
+    "userbot",
+    "whatsapp-web.js"
+  ],
+  "author": "Ayus Chatterjee",
+  "license": "MIT",
   "dependencies": {
-    "whatsapp-web.js": "^1.22.1",
-    "pg": "^8.11.1",
-    "dotenv": "^16.3.1",
+    "qrcode-terminal": "latest",
+    "tar": "latest",
+    "whatsapp-web.js": "latest"
   }
 }
