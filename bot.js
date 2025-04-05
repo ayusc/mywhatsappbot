@@ -4,7 +4,6 @@ const axios = require('axios');
 const AdmZip = require('adm-zip');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
-require('dotenv').config();
 
 const sessionUrl = process.env.DRIVE_SESSION_URL;
 const sessionZipPath = path.join(__dirname, 'session.zip');
