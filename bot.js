@@ -10,16 +10,18 @@ const qrcode = require("qrcode-terminal");
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false, // For Railway
+    rejectUnauthorized: false,
   },
 });
 
 const store = new PostgresStore({ pool });
 const client = new Client({
-  authStrategy: new RemoteAuth({ store }),
+  authStrategy: new RemoteAuth({
+    store: store,
+    clientId: "ayus-bot",
+  }),
   puppeteer: {
-    args: ['--no-sandbox'],
-    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
   },
 });
 
