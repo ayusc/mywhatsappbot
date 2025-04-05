@@ -21,6 +21,6 @@
     "qrcode-terminal": "^0.12.0",
     "whatsapp-web.js": "latest",
     "puppeteer-core": "^21.3.8",
-    "chrome-aws-lambda": "^10.1.0", 
+    "chrome-aws-lambda": "^10.1.0"
   }
 }
