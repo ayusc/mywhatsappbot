@@ -1,10 +1,8 @@
 // postgres-store.js
-const { Store } = require("whatsapp-web.js");
 const { Pool } = require("pg");
 
-class PostgresStore extends Store {
+class PostgresStore {
   constructor({ pool, tableName = "session" }) {
-    super();
     this.pool = pool;
     this.tableName = tableName;
     this.ready = this.init();
