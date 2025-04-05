@@ -1,63 +1,55 @@
-require("dotenv").config();
-const fs = require("fs");
-const path = require("path");
-const { Client, RemoteAuth } = require("whatsapp-web.js");
-const { Pool } = require("pg");
-const PostgresStore = require("./postgres-store");
-const qrcode = require("qrcode-terminal");
+require('dotenv').config();
+const { Client, RemoteAuth } = require('whatsapp-web.js');
+const qrcode = require('qrcode-terminal');
+const PostgresStore = require('./postgres-store');
+const fs = require('fs');
+const path = require('path');
 
-// PostgreSQL connection
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
+(async () => {
+    const store = new PostgresStore({ session: process.env.SESSION_ID });
+    await store.init();
 
-const store = new PostgresStore({ pool });
-const client = new Client({
-  authStrategy: new RemoteAuth({
-    store: store,
-    clientId: "ayus-bot",
-    backupSyncIntervalMs: 60000, 
-  }),
-  puppeteer: {
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  },
-});
+    const client = new Client({
+        authStrategy: new RemoteAuth({
+            clientId: process.env.SESSION_ID,
+            store,
+            backupSyncIntervalMs: 60000,
+        }),
+        puppeteer: {
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        },
+    });
 
-// Load all modules
-const modules = {};
-const modulesPath = path.join(__dirname, "modules");
+    client.on('qr', (qr) => {
+        console.log('📲 Scan this QR code to log in:');
+        qrcode.generate(qr, { small: true });
+    });
 
-fs.readdirSync(modulesPath).forEach((file) => {
-  if (file.endsWith(".js")) {
-    const mod = require(path.join(modulesPath, file));
-    if (mod.trigger && typeof mod.handler === "function") {
-      modules[mod.trigger.toLowerCase()] = mod.handler;
-      console.log(`✅ Loaded module: ${file} (trigger: "${mod.trigger}")`);
-    }
-  }
-});
+    client.on('ready', () => {
+        console.log('✅ Bot is ready!');
+    });
 
-client.on("qr", (qr) => {
-  qrcode.generate(qr, { small: true });
-  console.log("📲 Scan the QR code above with WhatsApp.");
-});
+    client.on('auth_failure', (msg) => {
+        console.error('❌ Auth failure:', msg);
+    });
 
-client.on("ready", () => {
-  console.log("🤖 Bot is ready!");
-});
+    client.on('disconnected', (reason) => {
+        console.log('🔌 Disconnected:', reason);
+    });
 
-client.on("message", async (msg) => {
-  const text = msg.body.toLowerCase();
-  if (modules[text]) {
-    try {
-      await modules[text](msg);
-    } catch (err) {
-      console.error(`❌ Error in module for trigger "${text}":`, err);
-    }
-  }
-});
+    // Load modules
+    const modulesPath = path.join(__dirname, 'modules');
+    fs.readdirSync(modulesPath).forEach(file => {
+        const module = require(path.join(modulesPath, file));
+        if (module && module.trigger && module.handler) {
+            client.on('message', async msg => {
+                if (msg.body.toLowerCase() === module.trigger.toLowerCase()) {
+                    await module.handler(client, msg);
+                }
+            });
+            console.log(`✅ Loaded module: ${file} (trigger: "${module.trigger}")`);
+        }
+    });
 
-client.initialize();
+    client.initialize();
+})();
