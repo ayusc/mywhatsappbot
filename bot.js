@@ -60,7 +60,7 @@ async function startBot() {
 
     client.on('message', async (msg) => {
         if (msg.body.toLowerCase() === '!ping') {
-            msg.reply('pong!');
+            msg.reply('Pong!');
         }
     });
 
