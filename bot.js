@@ -1,35 +1,24 @@
-import fs from 'fs';
-import path from 'path';
-import axios from 'axios';
-import AdmZip from 'adm-zip';
-import { Client, LocalAuth } from 'whatsapp-web.js';
-import { fileURLToPath } from 'url';
-import { config } from 'dotenv';
+const fs = require('fs');
+const path = require('path');
+const axios = require('axios');
+const AdmZip = require('adm-zip');
+const { Client, LocalAuth } = require('whatsapp-web.js');
+const qrcode = require('qrcode-terminal');
+require('dotenv').config();
 
-// Load .env
-config();
-
-// Get current directory
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Direct download URL of session.zip
 const sessionUrl = process.env.DRIVE_SESSION_URL;
 const sessionZipPath = path.join(__dirname, 'session.zip');
 const sessionFolder = path.join(__dirname, '.wwebjs_auth');
-
-// Ensure modules folder exists
 const modulesPath = path.join(__dirname, 'modules');
 
-// STEP 1: Download the session.zip file
 async function downloadSessionZip() {
     if (fs.existsSync(sessionFolder)) {
-        console.log('✅ Session folder already exists. Skipping download.');
+        console.log('✅ Session folder exists. Skipping download.');
         return;
     }
 
     if (!sessionUrl) {
-        console.error('❌ DRIVE_SESSION_URL not set in .env');
+        console.error('❌ DRIVE_SESSION_URL is not set.');
         process.exit(1);
     }
 
@@ -45,7 +34,6 @@ async function downloadSessionZip() {
     });
 }
 
-// STEP 2: Extract the session.zip file
 function extractSession() {
     if (fs.existsSync(sessionFolder)) return;
 
@@ -55,7 +43,6 @@ function extractSession() {
     console.log('✅ Session restored.');
 }
 
-// STEP 3: Initialize WhatsApp client
 async function startBot() {
     await downloadSessionZip();
     extractSession();
@@ -68,10 +55,9 @@ async function startBot() {
         }
     });
 
-    // Handle QR if session fails (optional fallback)
     client.on('qr', (qr) => {
-        console.log('⚠️  Session not valid. New QR required:\n');
-        import('qrcode-terminal').then(qrterm => qrterm.default.generate(qr, { small: true }));
+        console.log('⚠️  QR Required:\n');
+        qrcode.generate(qr, { small: true });
     });
 
     client.on('ready', () => {
@@ -81,17 +67,17 @@ async function startBot() {
     client.on('message', async (msg) => {
         const args = msg.body.trim().split(/\s+/);
         const command = args.shift().toLowerCase();
-
         const commandPath = path.join(modulesPath, `${command}.js`);
+
         if (fs.existsSync(commandPath)) {
-            const handler = await import(`./modules/${command}.js`);
-            if (handler.default) handler.default(client, msg, args);
+            const handler = require(commandPath);
+            if (typeof handler === 'function') {
+                handler(client, msg, args);
+            }
         }
     });
 
     client.initialize();
 }
 
-startBot().catch(err => {
-    console.error('❌ Failed to start bot:', err);
-});
+startBot().catch(console.error);
