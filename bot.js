@@ -5,7 +5,7 @@ const AdmZip = require('adm-zip');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 
-const sessionUrl = process.env.DRIVE_SESSION_URL;
+const sessionUrl = 'https://drive.google.com/uc?export=download&id=1ynJ78dI4HFWwYWof76id4Oujkk92xUmd';
 console.log('DRIVE_SESSION_URL =', process.env.DRIVE_SESSION_URL);
 const sessionZipPath = path.join(__dirname, 'session.zip');
 const sessionFolder = path.join(__dirname, '.wwebjs_auth');
