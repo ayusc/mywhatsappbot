@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const { Client, RemoteAuth } = require("whatsapp-web.js");
 const { Pool } = require("pg");
-const { PostgresStore } = require("whatsapp-web.js-postgres-auth");
+const PostgresStore = require("./postgres-store");
 const qrcode = require("qrcode-terminal");
 
 // PostgreSQL connection
