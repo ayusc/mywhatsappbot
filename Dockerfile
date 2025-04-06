@@ -38,6 +38,3 @@ RUN npm install
 
 # Copy app source
 COPY . .
-
-# Start the bot
-CMD ["node", "bot.js"]
