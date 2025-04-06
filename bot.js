@@ -1,61 +1,65 @@
-const fs = require('fs');
-const path = require('path');
-const qrcode = require('qrcode-terminal');
 const { Client, RemoteAuth } = require('whatsapp-web.js');
 const { MongoStore } = require('wwebjs-mongo');
 const mongoose = require('mongoose');
+const fs = require('fs');
+const path = require('path');
 
-// MongoDB URI
-const MONGODB_URI = 'mongodb+srv://ayus2003:Ayus%401311@cluster0.w5fp4ic.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+// Load environment variables
+require('dotenv').config();
 
-mongoose.connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-}).then(() => {
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI).then(() => {
     console.log('✅ Connected to MongoDB');
 
+    // Create session store
     const store = new MongoStore({ mongoose });
 
+    // Initialize client with puppeteer-core & system Chromium
     const client = new Client({
+        puppeteer: {
+            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        },
         authStrategy: new RemoteAuth({
             store,
-            backupSyncIntervalMs: 300000,
-        }),
-        puppeteer: {
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        },
+            backupSyncIntervalMs: 300000
+        })
     });
 
+    // Initialize client
+    client.initialize();
+
     client.on('qr', (qr) => {
-        console.log('📱 QR Code received. Scan it with your WhatsApp:');
-        qrcode.generate(qr, { small: true });
+        console.log('📱 QR RECEIVED. Scan this QR with your WhatsApp:');
+        console.log(qr);
     });
 
     client.on('ready', () => {
-        console.log('🎉 WhatsApp client is ready!');
+        console.log('✅ Client is ready!');
     });
 
-    client.on('authenticated', () => console.log('🔐 Client authenticated!'));
-    client.on('auth_failure', msg => console.error('❌ Auth failure:', msg));
-    client.on('disconnected', reason => console.log('🔌 Disconnected:', reason));
+    client.on('auth_failure', (msg) => {
+        console.error('❌ Authentication failure:', msg);
+    });
 
-    // Load command modules from ./modules/
+    // Load modules
     const modulesPath = path.join(__dirname, 'modules');
+    const modules = [];
+
     fs.readdirSync(modulesPath).forEach(file => {
         if (file.endsWith('.js')) {
-            const command = require(path.join(modulesPath, file));
-            if (command.name && typeof command.execute === 'function') {
-                client.on('message', async (msg) => {
-                    const body = msg.body.toLowerCase();
-                    if (body === command.name.toLowerCase()) {
-                        await command.execute(client, msg);
-                    }
-                });
-                console.log(`✅ Loaded module: ${command.name}`);
-            }
+            const module = require(path.join(modulesPath, file));
+            modules.push(module);
         }
     });
 
-    client.initialize();
-}).catch(err => console.error('❌ MongoDB connection error:', err));
+    // Handle messages
+    client.on('message', async (message) => {
+        for (const mod of modules) {
+            if (typeof mod.handle === 'function') {
+                await mod.handle(client, message);
+            }
+        }
+    });
+});
