@@ -26,6 +26,8 @@ mongoose.connect('mongodb+srv://ayus2003:Ayus%401311@cluster0.w5fp4ic.mongodb.ne
         }
     });
 
+    console.log('🧠 Using Chromium at:', process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium');
+
     // Basic debug events
     client.on('qr', (qr) => {
         console.log('📱 QR RECEIVED. Scan this QR with your WhatsApp:');
