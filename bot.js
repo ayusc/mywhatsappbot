@@ -6,34 +6,49 @@ const fs = require('fs');
 const path = require('path');
 
 // Connect to MongoDB
-mongoose.connect('mongodb+srv://ayus2003:Ayus%401311@cluster0.w5fp4ic.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0').then(async () => {
+mongoose.connect('mongodb+srv://ayus2003:Ayus%401311@cluster0.w5fp4ic.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', { useNewUrlParser: true, useUnifiedTopology: true })
+.then(() => {
     console.log('✅ Connected to MongoDB');
 
-    const store = new MongoStore({ mongoose: mongoose });
+    const store = new MongoStore({ mongoose });
 
     const client = new Client({
-    authStrategy: new RemoteAuth({
-        store: store,
-        backupSyncIntervalMs: 300000
-    }),
-    puppeteer: {
-        headless: true,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--no-zygote',
-            '--disable-gpu',
-            '--disable-features=site-per-process',
-            '--single-process',
-        ]
-    }
+        authStrategy: new RemoteAuth({
+            store,
+            backupSyncIntervalMs: 300000
+        }),
+        puppeteer: {
+            headless: true,
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
+                '--no-zygote',
+                '--disable-gpu',
+                '--disable-features=site-per-process',
+                '--single-process'
+            ]
+        }
     });
 
+    // Load modules
+    const modulesPath = path.join(__dirname, 'modules');
+    fs.readdir(modulesPath, (err, files) => {
+        if (err) return console.error('❌ Error loading modules:', err);
+        files.filter(file => file.endsWith('.js')).forEach(file => {
+            const modulePath = path.join(modulesPath, file);
+            const mod = require(modulePath);
+            if (typeof mod === 'function') {
+                mod(client);
+                console.log(`✅ Loaded module: ${file}`);
+            } else {
+                console.warn(`⚠️ Skipped module (not a function): ${file}`);
+            }
+        });
+    });
 
-    // Basic debug events
-    client.on('qr', (qr) => {
+    client.on('qr', qr => {
         console.log('📱 QR RECEIVED. Scan this QR with your WhatsApp:');
         console.log(qr);
     });
@@ -42,54 +57,17 @@ mongoose.connect('mongodb+srv://ayus2003:Ayus%401311@cluster0.w5fp4ic.mongodb.ne
         console.log('🔐 Authenticated successfully.');
     });
 
-    client.on('remote_session_saved', () => {
-        console.log('💾 Session saved to MongoDB.');
+    client.on('ready', () => {
+        console.log('✅ WhatsApp client is ready!');
     });
 
     client.on('auth_failure', msg => {
         console.error('❌ Authentication failed:', msg);
     });
 
-    client.on('loading_screen', (percent, message) => {
-        console.log(`⏳ Loading WhatsApp: ${percent}% - ${message}`);
+    client.on('disconnected', reason => {
+        console.log('❌ Client disconnected:', reason);
     });
-
-    client.on('ready', () => {
-        console.log('✅ WhatsApp client is ready!');
-    });
-
-    client.on('disconnected', (reason) => {
-        console.log('⚠️ Client was disconnected:', reason);
-    });
-
-    // Timeout checker if stuck
-    setTimeout(() => {
-        console.log('⌛ Still waiting for client to be ready... Maybe Chromium is stuck?');
-    }, 60000); // 60 seconds
-
-    // Load command modules dynamically
-    const modulesPath = path.join(__dirname, 'modules');
-    fs.readdir(modulesPath, (err, files) => {
-    if (err) {
-        console.error('❌ Error reading modules:', err);
-        return;
-    }
-    files.forEach(file => {
-        if (file.endsWith('.js')) {
-            const modulePath = path.join(modulesPath, file);
-            const module = require(modulePath);
-            if (typeof module === 'function') {
-                module(client);
-                console.log(`✅ Loaded module: ${file}`);
-            } else {
-                console.warn(`⚠️ Module ${file} does not export a function.`);
-            }
-        }
-    });
-    });
-
 
     client.initialize();
-}).catch(err => {
-    console.error('❌ MongoDB connection error:', err);
 });
