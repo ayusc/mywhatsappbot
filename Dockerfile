@@ -3,6 +3,7 @@ FROM node:18-slim
 # Install necessary dependencies for Puppeteer
 RUN apt-get update && apt-get install -y \
     wget \
+    git \
     ca-certificates \
     fonts-liberation \
     libappindicator3-1 \
