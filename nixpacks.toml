@@ -1,5 +1,0 @@
-[phases.setup]
-nixPkgs = ["nss", "atk", "cups", "pango", "libxcomposite", "libxrandr", "libxdamage", "libxfixes", "libxi", "libnss"]
-
-[variables]
-NODE_ENV = "production"
