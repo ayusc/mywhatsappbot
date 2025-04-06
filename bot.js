@@ -1,65 +1,68 @@
+require('dotenv').config();
 const { Client, RemoteAuth } = require('whatsapp-web.js');
 const { MongoStore } = require('wwebjs-mongo');
 const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
 
-// Load environment variables
-require('dotenv').config();
-
 // Connect to MongoDB
-mongoose.connect('mongodb+srv://ayus2003:Ayus%401311@cluster0.w5fp4ic.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0').then(() => {
+mongoose.connect('mongodb+srv://ayus2003:Ayus%401311@cluster0.w5fp4ic.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(async () => {
     console.log('✅ Connected to MongoDB');
 
-    // Create session store
-    const store = new MongoStore({ mongoose });
+    const store = new MongoStore({ mongoose: mongoose });
 
-    // Initialize client with puppeteer-core & system Chromium
     const client = new Client({
-        puppeteer: {
-            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        },
         authStrategy: new RemoteAuth({
-            store,
-            backupSyncIntervalMs: 300000
-        })
+            store: store,
+            backupSyncIntervalMs: 300000,
+        }),
+        puppeteer: {
+            executablePath: '/usr/bin/chromium',
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        }
     });
 
-    // Initialize client
-    client.initialize();
-
+    // Event Listeners
     client.on('qr', (qr) => {
-        console.log('📱 QR RECEIVED. Scan this QR with your WhatsApp:');
-        console.log(qr);
+        console.log('📱 QR RECEIVED. Use a terminal scanner or setup a headless GUI to scan.');
+        // Optionally, generate a QR file here
     });
 
-    client.on('ready', () => {
-        console.log('✅ Client is ready!');
+    client.on('authenticated', () => {
+        console.log('🔐 Authenticated successfully.');
     });
 
-    client.on('auth_failure', (msg) => {
+    client.on('auth_failure', msg => {
         console.error('❌ Authentication failure:', msg);
     });
 
-    // Load modules
+    client.on('ready', () => {
+        console.log('✅ WhatsApp client is ready!');
+    });
+
+    client.on('disconnected', (reason) => {
+        console.log('🔌 Client disconnected:', reason);
+    });
+
+    // Initialize bot
+    client.initialize();
+
+    // Load command modules
     const modulesPath = path.join(__dirname, 'modules');
-    const modules = [];
-
-    fs.readdirSync(modulesPath).forEach(file => {
-        if (file.endsWith('.js')) {
-            const module = require(path.join(modulesPath, file));
-            modules.push(module);
-        }
-    });
-
-    // Handle messages
-    client.on('message', async (message) => {
-        for (const mod of modules) {
-            if (typeof mod.handle === 'function') {
-                await mod.handle(client, message);
+    if (fs.existsSync(modulesPath)) {
+        fs.readdirSync(modulesPath).forEach(file => {
+            if (file.endsWith('.js')) {
+                const module = require(path.join(modulesPath, file));
+                if (typeof module === 'function') {
+                    module(client);
+                    console.log(`📦 Loaded module: ${file}`);
+                }
             }
-        }
-    });
+        });
+    }
+}).catch(err => {
+    console.error('❌ MongoDB connection error:', err);
 });
