@@ -1,8 +1,9 @@
 {
   "name": "whatsapp-bot",
   "version": "1.0.0",
-  "description": "WhatsApp bot using whatsapp-web.js with MongoDB session & modular architecture",
+  "description": "WhatsApp bot using whatsapp-web.js and RemoteAuth with MongoDB",
   "main": "bot.js",
+  "type": "commonjs",
   "scripts": {
     "start": "node bot.js"
   },
@@ -11,9 +12,8 @@
   },
   "dependencies": {
     "dotenv": "^16.3.1",
-    "mongoose": "^7.6.1",
+    "mongoose": "^7.5.0",
     "wwebjs-mongo": "^1.1.0",
-    "whatsapp-web.js": "github:nkbhasker/whatsapp-web.js#fix-remote-auth",
-    "puppeteer-core": "^21.3.8"
+    "whatsapp-web.js": "nkbhasker/whatsapp-web.js#fix-remote-auth"
   }
 }
