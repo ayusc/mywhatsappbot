@@ -8,7 +8,7 @@ const path = require('path');
 require('dotenv').config();
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI).then(() => {
+mongoose.connect('mongodb+srv://ayus2003:Ayus%401311@cluster0.w5fp4ic.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0').then(() => {
     console.log('✅ Connected to MongoDB');
 
     // Create session store
