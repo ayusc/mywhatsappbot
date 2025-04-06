@@ -6,37 +6,43 @@ const fs = require('fs');
 const path = require('path');
 
 // Connect to MongoDB
-mongoose.connect('mongodb+srv://ayus2003:Ayus%401311@cluster0.w5fp4ic.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(async () => {
+mongoose.connect('mongodb+srv://ayus2003:Ayus%401311@cluster0.w5fp4ic.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0').then(async () => {
     console.log('✅ Connected to MongoDB');
 
     const store = new MongoStore({ mongoose: mongoose });
 
     const client = new Client({
         authStrategy: new RemoteAuth({
-            store: store,
-            backupSyncIntervalMs: 300000,
+            store,
+            backupSyncIntervalMs: 300000
         }),
         puppeteer: {
-            executablePath: '/usr/bin/chromium',
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
+            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            headless: true,
         }
     });
 
-    // Event Listeners
+    // Basic debug events
     client.on('qr', (qr) => {
-        console.log('📱 QR RECEIVED. Use a terminal scanner or setup a headless GUI to scan.');
-        // Optionally, generate a QR file here
+        console.log('📱 QR RECEIVED. Scan this QR with your WhatsApp:');
+        console.log(qr);
     });
 
     client.on('authenticated', () => {
         console.log('🔐 Authenticated successfully.');
     });
 
+    client.on('remote_session_saved', () => {
+        console.log('💾 Session saved to MongoDB.');
+    });
+
     client.on('auth_failure', msg => {
-        console.error('❌ Authentication failure:', msg);
+        console.error('❌ Authentication failed:', msg);
+    });
+
+    client.on('loading_screen', (percent, message) => {
+        console.log(`⏳ Loading WhatsApp: ${percent}% - ${message}`);
     });
 
     client.on('ready', () => {
@@ -44,25 +50,31 @@ mongoose.connect('mongodb+srv://ayus2003:Ayus%401311@cluster0.w5fp4ic.mongodb.ne
     });
 
     client.on('disconnected', (reason) => {
-        console.log('🔌 Client disconnected:', reason);
+        console.log('⚠️ Client was disconnected:', reason);
     });
 
-    // Initialize bot
-    client.initialize();
+    // Timeout checker if stuck
+    setTimeout(() => {
+        console.log('⌛ Still waiting for client to be ready... Maybe Chromium is stuck?');
+    }, 60000); // 60 seconds
 
-    // Load command modules
+    // Load command modules dynamically
     const modulesPath = path.join(__dirname, 'modules');
-    if (fs.existsSync(modulesPath)) {
-        fs.readdirSync(modulesPath).forEach(file => {
+    fs.readdir(modulesPath, (err, files) => {
+        if (err) {
+            console.error('❌ Error reading modules:', err);
+            return;
+        }
+        files.forEach(file => {
             if (file.endsWith('.js')) {
-                const module = require(path.join(modulesPath, file));
-                if (typeof module === 'function') {
-                    module(client);
-                    console.log(`📦 Loaded module: ${file}`);
-                }
+                const modulePath = path.join(modulesPath, file);
+                require(modulePath)(client);
+                console.log(`✅ Loaded module: ${file}`);
             }
         });
-    }
+    });
+
+    client.initialize();
 }).catch(err => {
     console.error('❌ MongoDB connection error:', err);
 });
