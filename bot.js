@@ -61,18 +61,24 @@ mongoose.connect('mongodb+srv://ayus2003:Ayus%401311@cluster0.w5fp4ic.mongodb.ne
     // Load command modules dynamically
     const modulesPath = path.join(__dirname, 'modules');
     fs.readdir(modulesPath, (err, files) => {
-        if (err) {
-            console.error('❌ Error reading modules:', err);
-            return;
-        }
-        files.forEach(file => {
-            if (file.endsWith('.js')) {
-                const modulePath = path.join(modulesPath, file);
-                require(modulePath)(client);
+    if (err) {
+        console.error('❌ Error reading modules:', err);
+        return;
+    }
+    files.forEach(file => {
+        if (file.endsWith('.js')) {
+            const modulePath = path.join(modulesPath, file);
+            const module = require(modulePath);
+            if (typeof module === 'function') {
+                module(client);
                 console.log(`✅ Loaded module: ${file}`);
+            } else {
+                console.warn(`⚠️ Module ${file} does not export a function.`);
             }
-        });
+        }
     });
+    });
+
 
     client.initialize();
 }).catch(err => {
