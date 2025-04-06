@@ -1,86 +1,61 @@
 const fs = require('fs');
 const path = require('path');
-const axios = require('axios');
-const AdmZip = require('adm-zip');
-const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
-const chrome = require('chrome-aws-lambda');
+const { Client, RemoteAuth } = require('whatsapp-web.js');
+const { MongoStore } = require('wwebjs-mongo');
+const mongoose = require('mongoose');
 
-const sessionUrl = 'https://drive.google.com/uc?export=download&id=1ynJ78dI4HFWwYWof76id4Oujkk92xUmd';
-//console.log('DRIVE_SESSION_URL =', process.env.DRIVE_SESSION_URL);
-const sessionZipPath = path.join(__dirname, 'session.zip');
-const sessionFolder = path.join(__dirname, '.wwebjs_auth');
-const modulesPath = path.join(__dirname, 'modules');
+// MongoDB URI
+const MONGODB_URI = 'mongodb+srv://ayus2003:Ayus%401311@cluster0.w5fp4ic.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 
-async function downloadSessionZip() {
-    if (fs.existsSync(sessionFolder)) {
-        console.log('✅ Session folder exists. Skipping download.');
-        return;
-    }
+mongoose.connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+}).then(() => {
+    console.log('✅ Connected to MongoDB');
 
-    if (!sessionUrl) {
-        console.error('❌ DRIVE_SESSION_URL is not set.');
-        process.exit(1);
-    }
-
-    console.log('⬇️  Downloading session.zip from Drive...');
-
-    const writer = fs.createWriteStream(sessionZipPath);
-    const response = await axios.get(sessionUrl, { responseType: 'stream' });
-
-    return new Promise((resolve, reject) => {
-        response.data.pipe(writer);
-        writer.on('finish', resolve);
-        writer.on('error', reject);
-    });
-}
-
-function extractSession() {
-    if (fs.existsSync(sessionFolder)) return;
-
-    console.log('📦 Extracting session.zip...');
-    const zip = new AdmZip(sessionZipPath);
-    zip.extractAllTo(__dirname, true);
-    console.log('✅ Session restored.');
-}
-
-async function startBot() {
-    await downloadSessionZip();
-    extractSession();
+    const store = new MongoStore({ mongoose });
 
     const client = new Client({
-      authStrategy: new LocalAuth(),
-      puppeteer: {
-        executablePath: await chrome.executablePath,
-        args: chrome.args,
-        headless: chrome.headless,
-      }
+        authStrategy: new RemoteAuth({
+            store,
+            backupSyncIntervalMs: 300000,
+        }),
+        puppeteer: {
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        },
     });
 
-
     client.on('qr', (qr) => {
-        console.log('⚠️  QR Required:\n');
+        console.log('📱 QR Code received. Scan it with your WhatsApp:');
         qrcode.generate(qr, { small: true });
     });
 
     client.on('ready', () => {
-        console.log('🤖 Bot is ready!');
+        console.log('🎉 WhatsApp client is ready!');
     });
 
-    client.on('message', async (msg) => {
-        const args = msg.body.trim().split(/\s+/);
-        const command = args.shift().toLowerCase();
-        const commandPath = path.join(modulesPath, `${command}.js`);
+    client.on('authenticated', () => console.log('🔐 Client authenticated!'));
+    client.on('auth_failure', msg => console.error('❌ Auth failure:', msg));
+    client.on('disconnected', reason => console.log('🔌 Disconnected:', reason));
 
-        if (fs.existsSync(commandPath)) {
-            const handler = require(commandPath);
-            if (typeof handler === 'function') {
-                handler(client, msg, args);
+    // Load command modules from ./modules/
+    const modulesPath = path.join(__dirname, 'modules');
+    fs.readdirSync(modulesPath).forEach(file => {
+        if (file.endsWith('.js')) {
+            const command = require(path.join(modulesPath, file));
+            if (command.name && typeof command.execute === 'function') {
+                client.on('message', async (msg) => {
+                    const body = msg.body.toLowerCase();
+                    if (body === command.name.toLowerCase()) {
+                        await command.execute(client, msg);
+                    }
+                });
+                console.log(`✅ Loaded module: ${command.name}`);
             }
         }
     });
 
     client.initialize();
-}
-
-startBot().catch(console.error);
+}).catch(err => console.error('❌ MongoDB connection error:', err));
