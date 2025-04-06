@@ -1,26 +1,18 @@
 {
   "name": "whatsapp-userbot",
   "version": "1.0.0",
-  "description": "A modular WhatsApp userbot using whatsapp-web.js",
+  "description": "WhatsApp userbot using whatsapp-web.js with RemoteAuth and MongoDB",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js"
   },
-  "keywords": [
-    "whatsapp",
-    "bot",
-    "userbot",
-    "whatsapp-web.js"
-  ],
-  "author": "Ayus Chatterjee",
-  "license": "MIT",
+  "engines": {
+    "node": "18.x"
+  },
   "dependencies": {
-    "adm-zip": "^0.5.10",
-    "axios": "^1.6.8",
-    "dotenv": "^16.3.1",
+    "mongoose": "^7.0.0",
     "qrcode-terminal": "^0.12.0",
-    "whatsapp-web.js": "latest",
-    "puppeteer-core": "^21.3.8",
-    "chrome-aws-lambda": "^10.1.0"
+    "wwebjs-mongo": "^1.0.0",
+    "whatsapp-web.js": "nkbhasker/whatsapp-web.js#fix-remote-auth"
   }
 }
