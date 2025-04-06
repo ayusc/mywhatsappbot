@@ -12,16 +12,25 @@ mongoose.connect('mongodb+srv://ayus2003:Ayus%401311@cluster0.w5fp4ic.mongodb.ne
     const store = new MongoStore({ mongoose: mongoose });
 
     const client = new Client({
-        authStrategy: new RemoteAuth({
-            store,
-            backupSyncIntervalMs: 300000
-        }),
-        puppeteer: {
-            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            headless: true,
-        }
+    authStrategy: new RemoteAuth({
+        store: store,
+        backupSyncIntervalMs: 300000
+    }),
+    puppeteer: {
+        headless: true,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-zygote',
+            '--disable-gpu',
+            '--disable-features=site-per-process',
+            '--single-process',
+        ]
+    }
     });
+
 
     // Basic debug events
     client.on('qr', (qr) => {
