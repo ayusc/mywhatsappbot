@@ -1,10 +1,11 @@
 FROM node:18-slim
 
-# Install necessary dependencies for Puppeteer
+# Install system dependencies + Chromium
 RUN apt-get update && apt-get install -y \
-    wget \
     git \
+    wget \
     ca-certificates \
+    chromium \
     fonts-liberation \
     libappindicator3-1 \
     libasound2 \
@@ -29,18 +30,12 @@ RUN apt-get update && apt-get install -y \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Set working directory
-WORKDIR /app
+# Puppeteer expects this path for Chromium
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-# Copy package files and install dependencies
+WORKDIR /app
 COPY package*.json ./
 RUN npm install
-
-# Copy rest of the app
 COPY . .
 
-# Expose port (if you're building a web dashboard later)
-EXPOSE 3000
-
-# Launch the bot
 CMD ["npm", "start"]
