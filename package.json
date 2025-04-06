@@ -12,7 +12,7 @@
   "dependencies": {
     "dotenv": "^16.3.1",
     "mongoose": "^7.6.1",
-    "wwebjs-mongo": "^1.2.0",
+    "wwebjs-mongo": "^1.1.0",
     "whatsapp-web.js": "github:nkbhasker/whatsapp-web.js#fix-remote-auth",
     "puppeteer-core": "^21.3.8"
   }
