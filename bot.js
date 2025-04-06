@@ -5,6 +5,9 @@ const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
 
+// Replace with your own WhatsApp number in international format
+const OWNER_NUMBER = '916291937805@c.us'; // <-- Update this with your real number
+
 // Connect to MongoDB
 mongoose.connect('mongodb+srv://ayus2003:Ayus%401311@cluster0.w5fp4ic.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0').then(async () => {
     console.log('✅ Connected to MongoDB');
@@ -45,18 +48,21 @@ mongoose.connect('mongodb+srv://ayus2003:Ayus%401311@cluster0.w5fp4ic.mongodb.ne
         console.log(`⏳ Loading WhatsApp: ${percent}% - ${message}`);
     });
 
-    client.on('ready', () => {
+    client.on('ready', async () => {
         console.log('✅ WhatsApp client is ready!');
+
+        // 💬 Send "I AM ALIVE" to yourself
+        try {
+            await client.sendMessage(OWNER_NUMBER, 'I AM ALIVE');
+            console.log('📩 Sent "I AM ALIVE" to self.');
+        } catch (err) {
+            console.error('❌ Failed to send self message:', err);
+        }
     });
 
     client.on('disconnected', (reason) => {
         console.log('⚠️ Client was disconnected:', reason);
     });
-
-    // Timeout checker if stuck
-    setTimeout(() => {
-        console.log('⌛ Still waiting for client to be ready... Maybe Chromium is stuck?');
-    }, 60000); // 60 seconds
 
     // Load command modules dynamically
     const modulesPath = path.join(__dirname, 'modules');
