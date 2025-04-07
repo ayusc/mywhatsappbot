@@ -25,8 +25,8 @@ console.log('✅ Connected to MongoDB');
 const store = new MongoStore({ mongoose });
 const client = new Client({
   authStrategy: new RemoteAuth({
-    store,
-    backupSyncIntervalMs: 5 * 60 * 1000,
+    store: store,
+    backupSyncIntervalMs: 300000,
   }),
   puppeteer: {
     headless: true,
