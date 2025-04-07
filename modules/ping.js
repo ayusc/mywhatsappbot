@@ -1,13 +1,16 @@
-module.exports = (client) => {
-    client.on('message', async (message) => {
-        // Check if message is 'ping' and sent by you
-        if (message.body.toLowerCase() === 'ping' && message.fromMe) {
-            try {
-                await message.edit('pong');
-                console.log('✅ Message edited to pong');
-            } catch (err) {
-                console.error('❌ Failed to edit message:', err.message);
-            }
-        }
-    });
+export default {
+  name: '.ping',
+  description: 'Replies with Pong by editing the message',
+
+  async execute(msg, args, client) {
+    try {
+      // Try to edit the message
+      await msg.edit('🏓 Pong!');
+    } catch (err) {
+      // Fallback: send new message if edit fails
+      console.warn('⚠️ Edit failed, sending message instead.');
+      const chat = await msg.getChat();
+      await chat.sendMessage('🏓 Pong!');
+    }
+  }
 };
