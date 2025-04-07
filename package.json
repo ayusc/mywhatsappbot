@@ -14,7 +14,7 @@
     "dotenv": "^16.3.1",
     "adm-zip": "^0.5.10",
     "archiver": "^5.3.1",
-    "fs-extra": "^10.1.0"
-
+    "fs-extra": "^10.1.0",
+    "wwebjs-mongo": "^1.0.5"
   }
 }
