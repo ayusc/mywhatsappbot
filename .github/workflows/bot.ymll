@@ -1,9 +1,7 @@
 name: WhatsApp Bot
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   run-bot:
