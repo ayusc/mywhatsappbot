@@ -4,13 +4,13 @@ export default {
 
   async execute(msg, args, client) {
     const start = Date.now();
-    
-    const end = Date.now();
 
-    const ping = await msg.reply('Pong !');
+    await client.info();
+
+    const end = Date.now();
     
     const timeTaken = end - start;
     
-    await ping.edit(`Pong !\nResponse time: ${timeTaken} ms`);
+    await msg.reply(`Pong !\nResponse time: ${timeTaken} ms`);
   }
 };
