@@ -93,7 +93,7 @@ export default {
 
         const overlayBuffer = canvas.toBuffer();
 
-        await sharp(inputImage)
+        await sharp(imgBuffer)
         .composite([{ input: overlayBuffer, top: 0, left: 0 }])
         .jpeg({ quality: 100 })
         .toFile('./output.jpg');
