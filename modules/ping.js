@@ -5,7 +5,8 @@ export default {
   async execute(msg, args, client) {
     console.log('🏓 Pong!');
     const chat = await msg.getChat();
-    await msg.delete(true, true); 
+    await msg.edit('🏓 Pong!');
+    await msg.delete(true); 
     await chat.sendMessage('🏓 Pong!');
   }
 };
