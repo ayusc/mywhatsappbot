@@ -93,16 +93,24 @@ export default {
 
         ctx.fillText(finalText, baseSize / 2 - 15, baseSize - 250);
 
-        const overlayBuffer = canvas.toBuffer();
-        const { data: finalImageBuffer, info } = await sharp(resizedImageBuffer)
-        .composite([{ input: canvas.toBuffer(), top: 0, left: 0 }])
-        .flatten() // Remove alpha channel (JPEG doesn't support it)
-        .jpeg({ quality: 100 })
-        .toBuffer({ resolveWithObject: true });
+        import { MessageMedia } from 'whatsapp-web.js';
 
-      const base64Image = `data:image/${info.format};base64,${finalImageBuffer.toString('base64')}`;
+       // Prepare image buffer
+       const finalImageBuffer = await sharp(resizedImageBuffer)
+       .composite([{ input: canvas.toBuffer(), top: 0, left: 0 }])
+       .flatten()
+       .jpeg({ quality: 100 })
+       .toBuffer();
 
-      await client.setProfilePicture(client.info.wid._serialized, base64Image);
+       // Convert buffer to base64
+       const base64Image = finalImageBuffer.toString('base64');
+
+       // Wrap as MessageMedia
+       const media = new MessageMedia('image/jpeg', base64Image, 'dp.jpg');
+
+       // Now set as DP
+       await client.setProfilePicture(client.info.wid._serialized, media);
+
 
 
         console.log('✅ DP updated');
