@@ -5,12 +5,16 @@ import fs from 'fs';
 import path from 'path';
 import https from 'https';
 
-// Register Lobster font
-const fontPath = path.resolve('./Lobster-Regular.ttf');
 if (!fs.existsSync(fontPath)) {
   const file = fs.createWriteStream(fontPath);
-  https.get('https://github.com/google/fonts/raw/main/ofl/lobster/Lobster-Regular.ttf', (res) => {
-    res.pipe(file);
+  await new Promise((resolve, reject) => {
+    https.get('https://github.com/google/fonts/raw/main/ofl/lobster/Lobster-Regular.ttf', (res) => {
+      res.pipe(file);
+      file.on('finish', () => {
+        file.close(resolve);
+      });
+      file.on('error', reject);
+    });
   });
 }
 registerFont(fontPath, { family: 'FancyFont' });
