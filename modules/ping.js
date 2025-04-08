@@ -5,12 +5,10 @@ export default {
   async execute(msg, args, client) {
     const start = Date.now();
 
-    await client.info();
-
     const end = Date.now();
     
     const timeTaken = end - start;
     
-    await msg.reply(`Pong !\nResponse time: ${timeTaken} ms`);
+    await msg.reply('Pong !');
   }
 };
