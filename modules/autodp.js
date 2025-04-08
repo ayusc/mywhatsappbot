@@ -97,10 +97,12 @@ export default {
 
         const finalImageBuffer = await sharp(resizedImageBuffer)
         .composite([{ input: canvas.toBuffer(), top: 0, left: 0 }])
+        .flatten() // Removes alpha channel
         .jpeg({ quality: 100 })
         .toBuffer();
 
-        await client.setProfilePicture(client.info.wid._serialized, finalImageBuffer);
+        const base64Image = `data:image/jpeg;base64,${finalImageBuffer.toString('base64')}`;
+        await client.setProfilePicture(client.info.wid._serialized, base64Image);
 
         console.log('✅ DP updated');
       } catch (err) {
