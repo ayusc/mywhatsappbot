@@ -1,7 +1,10 @@
 name: WhatsApp Bot
 
 on:
-  workflow_dispatch:
+  push:
+    paths:
+      - 'package.json'  # Trigger workflow only if package.json is edited
+  workflow_dispatch:     # Optional manual run trigger
 
 jobs:
   run-bot:
@@ -18,10 +21,10 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install Dependencies
+      - name: Install Dependencies (generate lock file)
         run: npm install
 
-      - name: Commit lock file if changed
+      - name: Commit package-lock.json if changed
         run: |
           if git diff --quiet package-lock.json; then
             echo "No changes to package-lock.json"
@@ -29,11 +32,12 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add package-lock.json
-            git commit -m "Auto-generate package-lock.json"
+            git commit -m "Auto-generate package-lock.json from package.json"
             git push
           fi
 
       - name: Run Bot
+        if: ${{ hashFiles('package-lock.json') != '' }}
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
         run: npm start
