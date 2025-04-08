@@ -5,6 +5,8 @@ import fs from 'fs';
 import path from 'path';
 import https from 'https';
 
+const fontPath = path.resolve('./Lobster-Regular.ttf');
+
 if (!fs.existsSync(fontPath)) {
   const file = fs.createWriteStream(fontPath);
   await new Promise((resolve, reject) => {
@@ -17,6 +19,7 @@ if (!fs.existsSync(fontPath)) {
     });
   });
 }
+
 registerFont(fontPath, { family: 'FancyFont' });
 
 // Shared state
