@@ -56,9 +56,24 @@ client.on('qr', qr => {
   qrcode.generate(qr, { small: true });
 });
 
-client.on('authenticated', () => console.log('🔐 Authenticated!'));
+let isReady = false;
+let isAuthenticated = false;
+
+client.on('authenticated', () => {
+  if (!isAuthenticated) {
+    console.log('🔐 Authenticated!');
+    isAuthenticated = true;
+  }
+});
+
+client.on('ready', () => {
+  if (!isReady) {
+    console.log('✅ WhatsApp is ready!');
+    isReady = true;
+  }
+});
+
 client.on('auth_failure', msg => console.error('❌ Authentication failure:', msg));
-client.on('ready', () => console.log('✅ WhatsApp is ready!'));
 
 // Command handler
 client.on('message_create', async (msg) => {
