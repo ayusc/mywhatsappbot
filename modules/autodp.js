@@ -55,8 +55,12 @@ export default {
       try {
         const contact = await client.getContactById(userId);
         const imgBuffer = await contact.getProfilePicUrl()
-          .then(url => fetch(url).then(res => res.buffer()))
-          .catch(() => null);
+        .then(url => fetch(url)
+        .then(res => res.arrayBuffer())
+        .then(buf => Buffer.from(buf))
+        )
+        .catch(() => null);
+
         if (!imgBuffer) return console.log('❌ No profile picture found');
 
         // Get weather
@@ -93,12 +97,14 @@ export default {
 
         const overlayBuffer = canvas.toBuffer();
 
-        await sharp(imgBuffer)
+        const finalImageBuffer = await sharp(imgBuffer)
+        .resize(640, 640) 
         .composite([{ input: overlayBuffer, top: 0, left: 0 }])
         .jpeg({ quality: 100 })
-        .toFile('./output.jpg');
+        .toBuffer();
 
-        await client.setProfilePicture('./output.jpg');
+        await client.setProfilePicture(client.info.wid._serialized, finalImageBuffer);
+        
         console.log('✅ DP updated');
       } catch (err) {
         console.error('❌ Error in AutoDP:', err.message);
