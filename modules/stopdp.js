@@ -2,9 +2,9 @@ import { autodpInterval } from './autodp.js';
 
 export default {
   name: '.stopdp',
-  description: 'Stop AutoDP',
+  description: 'Stops the AutoDP interval',
 
-  async execute(msg, args, client) {
+  async execute(msg) {
     if (autodpInterval) {
       clearInterval(autodpInterval);
       global.autodpInterval = null;
