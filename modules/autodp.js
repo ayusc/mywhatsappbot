@@ -77,10 +77,11 @@ export default {
         const formattedTime = now.toLocaleString('en-US', options).replace(',', '');
         const finalText = `${formattedTime} ${temperature}°C`;
 
-        const image = sharp(imgBuffer);
-        const metadata = await image.metadata();
-        const width = metadata.width || 640;
-        const height = metadata.height || 640;
+        const baseSize = 640;
+        const resizedImageBuffer = await sharp(imgBuffer).resize(baseSize, baseSize).toBuffer();
+
+        const canvas = createCanvas(baseSize, baseSize);
+        const ctx = canvas.getContext('2d');
 
         const canvas = createCanvas(width, height);
         const ctx = canvas.getContext('2d');
@@ -97,11 +98,10 @@ export default {
 
         const overlayBuffer = canvas.toBuffer();
 
-        const finalImageBuffer = await sharp(imgBuffer)
-          .resize(640, 640)
-          .composite([{ input: overlayBuffer, top: 0, left: 0 }])
-          .jpeg({ quality: 100 })
-          .toBuffer();
+        const finalImageBuffer = await sharp(resizedImageBuffer)
+        .composite([{ input: canvas.toBuffer(), top: 0, left: 0 }])
+        .jpeg({ quality: 100 })
+        .toBuffer();
 
         await client.setProfilePicture(client.info.wid._serialized, finalImageBuffer);
 
