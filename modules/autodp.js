@@ -1,5 +1,3 @@
-// modules/autodp.js
-
 import fetch from 'node-fetch';
 import sharp from 'sharp';
 import fs from 'fs/promises';
