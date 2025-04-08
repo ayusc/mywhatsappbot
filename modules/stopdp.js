@@ -1,17 +1,20 @@
-import { autodpInterval } from './.autodp.js';
+import { autodpInterval } from './autodp.js';
+
+let interval = autodpInterval;
 
 export default {
   name: '.stopdp',
-  description: 'Stop the automatic profile picture update',
+  description: 'Stops the auto profile picture updater',
 
-  async execute(msg) {
-    if (!autodpInterval) {
+  async execute(msg, args, client) {
+    if (interval) {
+      clearInterval(interval);
+      interval = null;
+      await msg.reply('🛑 AutoDP stopped.');
+    } else {
       await msg.reply('ℹ️ AutoDP is not running.');
-      return;
     }
-
-    clearInterval(autodpInterval);
-    globalThis.autodpInterval = null; // OR manually reset it here with a setter
-    await msg.reply('🛑 AutoDP stopped.');
   }
 };
+
+export { interval as autodpInterval };
