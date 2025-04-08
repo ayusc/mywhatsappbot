@@ -1,30 +1,51 @@
 import fetch from 'node-fetch';
 
+let interval = null;
+
 export default {
   name: '.autobio',
-  description: 'Auto update about status every 60 seconds with random quotes',
+  description: 'Start/stop updating WhatsApp "About" with motivational quotes every X seconds (default 60s)',
 
   async execute(msg, args, client) {
-    const interval = 10000; // 10 seconds
-    const maxLength = 139;
+    const subcommand = args[0]?.toLowerCase();
+    const AUTO_BIO_INTERVAL = parseInt(process.env.AUTO_BIO_INTERVAL_MS || '60000', 10); // default 60 seconds
 
-    msg.reply('✅ AutoBio started. Your About will update every 10 seconds.');
+    if (subcommand === 'stop') {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+        await msg.delete(true, true);
+        msg.reply('🛑 AutoBio stopped.');
+      } else {
+        await msg.delete(true, true);
+        msg.reply('ℹ️ AutoBio is not running.');
+      }
+      return;
+    }
 
-    setInterval(async () => {
+    if (interval) {
+      await msg.delete(true, true);
+      msg.reply('⚠️ AutoBio is already running!');
+      return;
+    }
+    await msg.delete(true, true);
+    msg.reply(`✅ AutoBio started! Updating about every ${AUTO_BIO_INTERVAL / 1000} seconds.`);
+
+    interval = setInterval(async () => {
       try {
-        const res = await fetch('https://zenquotes.io/api/random');
+        const res = await fetch('https://quotes-api-self.vercel.app/quote');
         const data = await res.json();
-        const quote = `${data[0].q} —${data[0].a}`;
 
-        if (quote.length <= maxLength) {
+        const quote = `${data.quote} —${data.author}`;
+        if (quote.length <= 139) {
           await client.setStatus(quote);
-          console.log(`✅ About updated: ${quote}`);
+          console.log(`✅ Set about successfull`);
         } else {
-          console.log(`⚠️ Quote too long, skipped: ${quote}`);
+          console.log(`⏭️ Skipped long quote (${quote.length} chars)`);
         }
       } catch (err) {
-        console.error('❌ Failed to update about:', err.message);
+        console.error('❌ Error fetching quote or setting status:', err.message);
       }
-    }, interval);
+    }, AUTO_BIO_INTERVAL);
   }
 };
