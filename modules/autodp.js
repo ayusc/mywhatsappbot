@@ -92,14 +92,13 @@ export default {
         ctx.fillText(finalText, width / 2 - 15, height - 250);
 
         const overlayBuffer = canvas.toBuffer();
-        const finalImageBuffer = await sharp(imgBuffer)
-        .resize(640, 640) // 🔄 WhatsApp-friendly size
+
+        await sharp(inputImage)
         .composite([{ input: overlayBuffer, top: 0, left: 0 }])
         .jpeg({ quality: 100 })
-        .toBuffer();
+        .toFile('./output.jpg');
 
-
-        await client.setProfilePicture(client.info.wid._serialized, finalImageBuffer);
+        await client.setProfilePicture('./output.jpg');
         console.log('✅ DP updated');
       } catch (err) {
         console.error('❌ Error in AutoDP:', err.message);
