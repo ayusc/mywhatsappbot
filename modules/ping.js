@@ -4,14 +4,13 @@ export default {
 
   async execute(msg, args, client) {
     const start = Date.now();
-
-    await msg.getChat(); // optional
-    await msg.reply('🏓 Pong!'); // main async operation
+    
     const end = Date.now();
 
+    ping = await msg.reply('Pong !');
+    
     const timeTaken = end - start;
-
-    await chat.sendMessage(`🏓 Pong!\nResponse time: ${timeTaken} ms`);
-    await msg.delete(true, true);
+    
+    await msg.edit(`Pong !\nResponse time: ${timeTaken} ms`);
   }
 };
