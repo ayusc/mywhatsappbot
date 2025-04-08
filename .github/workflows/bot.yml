@@ -10,26 +10,30 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: 'npm'  # This enables automatic caching of npm modules
-
-      # Optional: If you want more granular caching control, use this instead
-      # - name: Cache node modules
-      #   uses: actions/cache@v3
-      #   with:
-      #     path: ~/.npm
-      #     key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-node-
 
       - name: Install Dependencies
         run: npm install
 
+      - name: Commit lock file if changed
+        run: |
+          if git diff --quiet package-lock.json; then
+            echo "No changes to package-lock.json"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add package-lock.json
+            git commit -m "Auto-generate package-lock.json"
+            git push
+          fi
+
       - name: Run Bot
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
-        run: npm start  # Or 'node index.js'
+        run: npm start
