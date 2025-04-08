@@ -91,7 +91,7 @@ export default {
         ctx.shadowColor = 'rgba(0,0,0,0.5)';
         ctx.shadowBlur = 8;
 
-        ctx.fillText(finalText, width / 2, height - 120);
+        ctx.fillText(finalText, baseSize / 2 - 15, baseSize - 250);
 
         const overlayBuffer = canvas.toBuffer();
 
