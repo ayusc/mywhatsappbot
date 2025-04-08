@@ -91,6 +91,9 @@ async function generateOverlayedImage(city) {
   return outputBuffer;
 }
 
+// Exporting interval control for .stopdp
+export let autodpInterval = null;
+
 export default {
   name: '.autodp',
   description: 'Start updating your DP every X seconds with styled clock + temperature',
@@ -101,10 +104,12 @@ export default {
 
     if (autodpInterval) {
       await msg.reply('⚠️ AutoDP is already running.');
+      await msg.delete(true, true);
       return;
     }
 
-    await msg.reply(`✅ AutoDP started! Updating every ${AUTO_DP_INTERVAL / 1000}s for city ${CITY}`);
+    await msg.reply(`✅ AutoDP started! Updating every ${AUTO_DP_INTERVAL / 1000}s for ${CITY}`);
+    await msg.delete(true, true);
 
     const updateDP = async () => {
       try {
