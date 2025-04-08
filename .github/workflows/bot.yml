@@ -15,6 +15,16 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
+          cache: 'npm'  # This enables automatic caching of npm modules
+
+      # Optional: If you want more granular caching control, use this instead
+      # - name: Cache node modules
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ~/.npm
+      #     key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-node-
 
       - name: Install Dependencies
         run: npm install
@@ -22,4 +32,4 @@ jobs:
       - name: Run Bot
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
-        run: npm start  # Or 'node index.js' – your choice
+        run: npm start  # Or 'node index.js'
