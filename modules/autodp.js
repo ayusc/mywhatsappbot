@@ -83,9 +83,6 @@ export default {
         const canvas = createCanvas(baseSize, baseSize);
         const ctx = canvas.getContext('2d');
 
-        const canvas = createCanvas(width, height);
-        const ctx = canvas.getContext('2d');
-
         ctx.clearRect(0, 0, width, height);
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
