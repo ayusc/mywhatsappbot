@@ -1,51 +1,66 @@
 import fs from 'fs';
+import path from 'path';
+import os from 'os';
 import fetch from 'node-fetch';
 import sharp from 'sharp';
 import { createCanvas, registerFont } from 'canvas';
-import { fileURLToPath } from 'url';
-import path from 'path';
 
-let interval = null;
+let autodpInterval = null;
 
-// Register the fancy font (make sure font.ttf exists)
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-registerFont(path.join(__dirname, '../font.ttf'), { family: 'FancyFont' });
+const FONT_URL = 'https://github.com/google/fonts/raw/main/ofl/lobster/Lobster-Regular.ttf';
+const FONT_PATH = path.join(os.tmpdir(), 'Lobster-Regular.ttf');
+const FONT_NAME = 'FancyFont';
+const IMAGE_PATH = 'dp.jpg'; // Change to your base image path
 
-async function getCoordinates(city) {
+async function ensureFont() {
+  if (!fs.existsSync(FONT_PATH)) {
+    const res = await fetch(FONT_URL);
+    const buf = await res.arrayBuffer();
+    fs.writeFileSync(FONT_PATH, Buffer.from(buf));
+  }
+  registerFont(FONT_PATH, { family: FONT_NAME });
+}
+
+async function getLatLon(city) {
   const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1`);
   const data = await res.json();
-  const place = data.results?.[0];
-  if (!place) throw new Error(`City "${city}" not found`);
-  return { latitude: place.latitude, longitude: place.longitude };
+  if (!data.results || !data.results.length) throw new Error('City not found');
+  return data.results[0];
 }
 
-function getDateTimeString() {
-  const now = new Date();
-  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const day = dayNames[now.getDay()];
-  const dd = String(now.getDate()).padStart(2, '0');
-  const mm = String(now.getMonth() + 1).padStart(2, '0');
-  const yyyy = now.getFullYear();
-  let hours = now.getHours();
-  const mins = String(now.getMinutes()).padStart(2, '0');
-  const ampm = hours >= 12 ? 'P.M' : 'A.M';
-  hours = hours % 12 || 12;
-  return `${day} ${dd}.${mm}.${yyyy} ${hours}:${mins} ${ampm}`;
-}
-
-async function getWeather(lat, lon) {
-  const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m&timezone=auto`);
+async function getTemperature(city) {
+  const { latitude, longitude } = await getLatLon(city);
+  const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m`);
   const data = await res.json();
-  return data.current.temperature_2m;
+  return Math.round(data.current.temperature_2m);
 }
 
-async function generateImage(city, lat, lon) {
-  const temperature = await getWeather(lat, lon);
-  const dateText = getDateTimeString();
-  const finalText = `${dateText} ${temperature}°C`;
+function formatTime(temp) {
+  const now = new Date();
+  const datePart = now.toLocaleDateString('en-GB', {
+    weekday: 'short',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  }).replace(',', '');
 
-  const inputImage = 'dp.jpg';
-  const outputImage = 'autodp.jpg';
+  const timePart = now.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+
+  return `${datePart} ${timePart} ${temp}°C`;
+}
+
+async function generateOverlayedImage(city) {
+  await ensureFont();
+
+  const temp = await getTemperature(city);
+  const finalText = formatTime(temp);
+
+  const inputImage = IMAGE_PATH;
+  const outputImage = 'final_dp.jpg';
 
   const image = sharp(inputImage);
   const metadata = await image.metadata();
@@ -58,72 +73,50 @@ async function generateImage(city, lat, lon) {
   ctx.clearRect(0, 0, width, height);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.font = 'bold 64px FancyFont';
+  ctx.font = 'bold 52px FancyFont';
   ctx.fillStyle = 'white';
-  ctx.shadowColor = 'rgba(0,0,0,0.5)';
-  ctx.shadowBlur = 10;
 
-  ctx.fillText(finalText, width / 2, height - 150);
+  ctx.shadowColor = 'rgba(0,0,0,0.5)';
+  ctx.shadowBlur = 8;
+
+  ctx.fillText(finalText, width / 2 - 15, height - 250); 
 
   const overlayBuffer = canvas.toBuffer();
 
-  await sharp(inputImage)
+  const outputBuffer = await sharp(inputImage)
     .composite([{ input: overlayBuffer, top: 0, left: 0 }])
     .jpeg({ quality: 100 })
-    .toFile(outputImage);
+    .toBuffer();
 
-  return outputImage;
+  return outputBuffer;
 }
 
 export default {
   name: '.autodp',
-  description: 'Updates your WhatsApp profile picture with date & weather every X seconds',
+  description: 'Start updating your DP every X seconds with styled clock + temperature',
 
   async execute(msg, args, client) {
-    const command = msg.body.toLowerCase().trim();
     const AUTO_DP_INTERVAL = parseInt(process.env.AUTO_DP_INTERVAL_MS || '60000', 10);
-    const CITY = process.env.CITY || 'Delhi';
+    const CITY = process.env.CITY || 'Kolkata';
 
-    if (command === '.stopdp') {
-      if (interval) {
-        clearInterval(interval);
-        interval = null;
-        return msg.reply('🛑 AutoDP stopped.');
-      } else {
-        return msg.reply('ℹ️ AutoDP is not running.');
+    if (autodpInterval) {
+      await msg.reply('⚠️ AutoDP is already running.');
+      return;
+    }
+
+    await msg.reply(`✅ AutoDP started! Updating every ${AUTO_DP_INTERVAL / 1000}s for city ${CITY}`);
+
+    const updateDP = async () => {
+      try {
+        const buffer = await generateOverlayedImage(CITY);
+        await client.setProfilePic(buffer);
+        console.log('✅ DP updated');
+      } catch (err) {
+        console.error('❌ DP update error:', err.message);
       }
-    }
+    };
 
-    if (interval) {
-      return msg.reply('⚠️ AutoDP is already running!');
-    }
-
-    msg.reply(`✅ AutoDP started for ${CITY}! Updating every ${AUTO_DP_INTERVAL / 1000}s.`);
-
-    try {
-      const { latitude, longitude } = await getCoordinates(CITY);
-
-      // Download profile picture once
-      const user = await msg.getContact();
-      const dp = await user.getProfilePicUrl();
-      const res = await fetch(dp);
-      const buffer = await res.buffer();
-      fs.writeFileSync('dp.jpg', buffer);
-
-      // Set interval to update every minute
-      interval = setInterval(async () => {
-        try {
-          const filePath = await generateImage(CITY, latitude, longitude);
-          await client.setProfilePic(filePath);
-          console.log(`✅ Updated profile picture at ${new Date().toLocaleTimeString()}`);
-        } catch (err) {
-          console.error('❌ Error updating profile picture:', err.message);
-        }
-      }, AUTO_DP_INTERVAL);
-
-    } catch (err) {
-      console.error('❌ Failed to start AutoDP:', err.message);
-      msg.reply(`❌ Could not start AutoDP: ${err.message}`);
-    }
+    await updateDP(); // run immediately
+    autodpInterval = setInterval(updateDP, AUTO_DP_INTERVAL);
   }
 };
