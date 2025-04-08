@@ -7,20 +7,22 @@ import https from 'https';
 
 const fontPath = path.resolve('./Lobster-Regular.ttf');
 
-if (!fs.existsSync(fontPath)) {
-  const file = fs.createWriteStream(fontPath);
-  await new Promise((resolve, reject) => {
-    https.get('https://github.com/google/fonts/raw/main/ofl/lobster/Lobster-Regular.ttf', (res) => {
-      res.pipe(file);
-      file.on('finish', () => {
-        file.close(resolve);
+async function ensureFontLoaded() {
+  if (!fs.existsSync(fontPath)) {
+    const file = fs.createWriteStream(fontPath);
+    await new Promise((resolve, reject) => {
+      https.get('https://github.com/google/fonts/raw/main/ofl/lobster/Lobster-Regular.ttf', (res) => {
+        res.pipe(file);
+        file.on('finish', () => {
+          file.close(resolve);
+        });
+        file.on('error', reject);
       });
-      file.on('error', reject);
     });
-  });
-}
+  }
 
-registerFont(fontPath, { family: 'FancyFont' });
+  registerFont(fontPath, { family: 'FancyFont' });
+}
 
 // Shared state
 export let autodpInterval = null;
@@ -34,7 +36,7 @@ export default {
       await msg.reply('⚠️ AutoDP is already running!');
       return;
     }
-
+    await ensureFontLoaded();
     const city = process.env.CITY || 'Kolkata';
     const intervalMs = parseInt(process.env.AUTO_DP_INTERVAL_MS || '60000', 10);
 
