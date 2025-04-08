@@ -8,7 +8,7 @@ export default {
     const interval = 60000; // 60 seconds
     const maxLength = 139;
 
-    msg.reply('✅ AutoBio started. Motivational quotes will update every 60 seconds.');
+    msg.reply('✅ AutoBio started. Your About will update every 60 seconds.');
 
     setInterval(async () => {
       try {
