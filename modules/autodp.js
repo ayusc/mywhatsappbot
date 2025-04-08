@@ -1,21 +1,26 @@
 import fetch from 'node-fetch';
 import sharp from 'sharp';
-import fs from 'fs';
 import { createCanvas, registerFont } from 'canvas';
+import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
-import { downloadMediaMessage } from '@whiskeysockets/baileys';
+import https from 'https';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Register Lobster font
+const fontPath = path.resolve('./Lobster-Regular.ttf');
+if (!fs.existsSync(fontPath)) {
+  const file = fs.createWriteStream(fontPath);
+  https.get('https://github.com/google/fonts/raw/main/ofl/lobster/Lobster-Regular.ttf', (res) => {
+    res.pipe(file);
+  });
+}
+registerFont(fontPath, { family: 'FancyFont' });
 
-registerFont(path.join(__dirname, '../fonts/Lobster-Regular.ttf'), { family: 'FancyFont' });
-
+// Shared state
 export let autodpInterval = null;
 
 export default {
   name: '.autodp',
-  description: 'Start updating profile pic with date, time, and temperature',
+  description: 'Automatically update profile pic with clock & temp',
 
   async execute(msg, args, client) {
     if (autodpInterval) {
@@ -23,39 +28,39 @@ export default {
       return;
     }
 
-    const AUTO_DP_INTERVAL = parseInt(process.env.AUTO_DP_INTERVAL_MS || '60000', 10); // default 60s
-    const CITY = process.env.CITY || 'Kolkata';
+    const city = process.env.CITY || 'Kolkata';
+    const intervalMs = parseInt(process.env.AUTO_DP_INTERVAL_MS || '60000', 10);
 
-    await msg.reply(`✅ AutoDP started! Updating every ${AUTO_DP_INTERVAL / 1000} seconds.`);
+    await msg.reply(`✅ AutoDP started. Updating every ${intervalMs / 1000}s.`);
+
+    const userId = msg.fromMe ? client.info.wid._serialized : msg.author || msg.from;
 
     autodpInterval = setInterval(async () => {
       try {
-        const quoted = await msg.getContact();
-        const pfp = await client.profilePictureUrl(quoted.id._serialized, 'image');
-        const res = await fetch(pfp);
-        const buffer = Buffer.from(await res.arrayBuffer());
+        const contact = await client.getContactById(userId);
+        const imgBuffer = await contact.getProfilePicUrl()
+          .then(url => fetch(url).then(res => res.buffer()))
+          .catch(() => null);
+        if (!imgBuffer) return console.log('❌ No profile picture found');
 
-        const weatherRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${CITY}`);
-        const { results } = await weatherRes.json();
-        if (!results || results.length === 0) throw new Error('City not found');
-        const { latitude, longitude } = results[0];
+        // Get weather
+        const locationRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${city}`);
+        const locationData = await locationRes.json();
+        const { latitude, longitude } = locationData.results?.[0] || {};
+        if (!latitude || !longitude) return console.log('❌ Could not find city coordinates');
 
-        const weather = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m`);
-        const { current } = await weather.json();
-        const temperature = current.temperature_2m;
+        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m`);
+        const weatherData = await weatherRes.json();
+        const temperature = weatherData.current?.temperature_2m || 'N/A';
 
         const now = new Date();
-        const day = now.toLocaleDateString('en-GB', { weekday: 'short' });
-        const date = now.toLocaleDateString('en-GB').replace(/\//g, '.');
-        const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-        const ampm = now.toLocaleTimeString('en-US', { hour: '2-digit' }).includes('AM') ? 'A.M' : 'P.M';
+        const options = { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true };
+        const formattedTime = now.toLocaleString('en-US', options).replace(',', '');
+        const finalText = `${formattedTime} ${temperature}°C`;
 
-        const finalText = `${day} ${date} ${time} ${ampm} ${temperature}°C`;
-
-        const image = sharp(buffer);
+        const image = sharp(imgBuffer);
         const metadata = await image.metadata();
-        const width = metadata.width;
-        const height = metadata.height;
+        const { width, height } = metadata;
 
         const canvas = createCanvas(width, height);
         const ctx = canvas.getContext('2d');
@@ -67,21 +72,20 @@ export default {
         ctx.fillStyle = 'white';
         ctx.shadowColor = 'rgba(0,0,0,0.5)';
         ctx.shadowBlur = 8;
+
         ctx.fillText(finalText, width / 2 - 15, height - 250);
 
         const overlayBuffer = canvas.toBuffer();
-
-        const outputPath = path.join(__dirname, '../temp/profile.jpg');
-        await sharp(buffer)
+        const finalImageBuffer = await sharp(imgBuffer)
           .composite([{ input: overlayBuffer, top: 0, left: 0 }])
           .jpeg({ quality: 100 })
-          .toFile(outputPath);
+          .toBuffer();
 
-        await client.updateProfilePicture(msg.from, fs.readFileSync(outputPath));
-        console.log('✅ Profile picture updated');
+        await client.setProfilePicture(client.info.wid._serialized, finalImageBuffer);
+        console.log('✅ DP updated');
       } catch (err) {
         console.error('❌ Error in AutoDP:', err.message);
       }
-    }, AUTO_DP_INTERVAL);
+    }, intervalMs);
   }
 };
