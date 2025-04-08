@@ -8,20 +8,26 @@ import https from 'https';
 const fontPath = path.resolve('./Lobster-Regular.ttf');
 
 async function ensureFontLoaded() {
-  if (!fs.existsSync(fontPath)) {
+  if (!fs.existsSync(fontPath) || fs.statSync(fontPath).size < 10000) {
+    // Re-download if missing or clearly corrupted
     const file = fs.createWriteStream(fontPath);
     await new Promise((resolve, reject) => {
       https.get('https://github.com/google/fonts/raw/main/ofl/lobster/Lobster-Regular.ttf', (res) => {
+        if (res.statusCode !== 200) return reject(new Error(`Failed to download font: ${res.statusCode}`));
         res.pipe(file);
         file.on('finish', () => {
           file.close(resolve);
         });
         file.on('error', reject);
-      });
+      }).on('error', reject);
     });
   }
 
-  registerFont(fontPath, { family: 'FancyFont' });
+  try {
+    registerFont(fontPath, { family: 'FancyFont' });
+  } catch (err) {
+    throw new Error(`Failed to register font: ${err.message}`);
+  }
 }
 
 // Shared state
