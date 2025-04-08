@@ -44,8 +44,8 @@ export default {
     await ensureFontLoaded();
 
     const city = process.env.CITY || 'Kolkata';
-    const intervalMs = parseInt(process.env.AUTO_DP_INTERVAL_MS || '60000', 10);
-    const imageUrl = process.env.IMAGE_URL || 'https://example.com/default.jpg'; // Your image link here
+    const intervalMs = parseInt(process.env.AUTO_DP_INTERVAL_MS || '5000', 10);
+    const imageUrl = process.env.IMAGE_URL || 'https://raw.githubusercontent.com/ayusc/mywhatsappbot/main/dp.jpg'; // Your image link here
 
     await msg.reply(`✅ AutoDP started. Updating every ${intervalMs / 1000}s.`);
 
