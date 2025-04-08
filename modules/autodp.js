@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import followRedirects from 'follow-redirects';
 const { https } = followRedirects;
+import { MessageMedia } from 'whatsapp-web.js';
 
 const fontPath = path.resolve('./Lobster-Regular.ttf');
 
