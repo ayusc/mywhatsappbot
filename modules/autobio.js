@@ -5,10 +5,10 @@ export default {
   description: 'Auto update about status every 60 seconds with random quotes',
 
   async execute(msg, args, client) {
-    const interval = 60000; // 60 seconds
+    const interval = 10000; // 10 seconds
     const maxLength = 139;
 
-    msg.reply('✅ AutoBio started. Your About will update every 60 seconds.');
+    msg.reply('✅ AutoBio started. Your About will update every 10 seconds.');
 
     setInterval(async () => {
       try {
