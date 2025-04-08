@@ -11,6 +11,6 @@ export default {
     
     const timeTaken = end - start;
     
-    await msg.edit(`Pong !\nResponse time: ${timeTaken} ms`);
+    await ping.edit(`Pong !\nResponse time: ${timeTaken} ms`);
   }
 };
