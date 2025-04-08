@@ -83,7 +83,7 @@ export default {
         const canvas = createCanvas(baseSize, baseSize);
         const ctx = canvas.getContext('2d');
 
-        ctx.clearRect(0, 0, width, height);
+        ctx.clearRect(0, 0, baseSize, baseSize);
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.font = 'bold 52px FancyFont';
