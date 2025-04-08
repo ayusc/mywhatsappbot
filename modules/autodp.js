@@ -3,7 +3,8 @@ import sharp from 'sharp';
 import { createCanvas, registerFont } from 'canvas';
 import fs from 'fs';
 import path from 'path';
-import { https } from 'follow-redirects';
+import followRedirects from 'follow-redirects';
+const { https } = followRedirects;
 
 const fontPath = path.resolve('./Lobster-Regular.ttf');
 
