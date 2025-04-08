@@ -1,67 +1,61 @@
 import fetch from 'node-fetch';
 import sharp from 'sharp';
-import fs from 'fs/promises';
+import fs from 'fs';
+import { createCanvas, registerFont } from 'canvas';
 import path from 'path';
-import { createCanvas, registerFont, loadImage } from 'canvas';
+import { fileURLToPath } from 'url';
+import { downloadMediaMessage } from '@whiskeysockets/baileys';
 
-import { autodpInterval } from './stopdp.js'; // To avoid duplicate declarations
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const FONT_URL = 'https://fonts.gstatic.com/s/lobster/v28/neILzCirqoswsqX9zoymM5Ez.woff2';
-const FONT_PATH = './Lobster-Regular.ttf';
+registerFont(path.join(__dirname, '../fonts/Lobster-Regular.ttf'), { family: 'FancyFont' });
 
-let interval = null;
+export let autodpInterval = null;
 
 export default {
   name: '.autodp',
-  description: 'Automatically updates profile picture with time & weather info',
+  description: 'Start updating profile pic with date, time, and temperature',
 
   async execute(msg, args, client) {
-    const CITY = process.env.CITY || 'Kolkata';
-    const AUTO_DP_INTERVAL = parseInt(process.env.AUTO_DP_INTERVAL_MS || '60000', 10);
-
-    if (interval) {
+    if (autodpInterval) {
       await msg.reply('⚠️ AutoDP is already running!');
       return;
     }
 
-    const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${CITY}`);
-    const locData = await res.json();
-    const { latitude, longitude } = locData.results[0];
+    const AUTO_DP_INTERVAL = parseInt(process.env.AUTO_DP_INTERVAL_MS || '60000', 10); // default 60s
+    const CITY = process.env.CITY || 'Kolkata';
 
-    // Download font
-    const fontBuffer = await fetch(FONT_URL).then(r => r.arrayBuffer());
-    await fs.writeFile(FONT_PATH, Buffer.from(fontBuffer));
-    registerFont(FONT_PATH, { family: 'Lobster' });
+    await msg.reply(`✅ AutoDP started! Updating every ${AUTO_DP_INTERVAL / 1000} seconds.`);
 
-    interval = setInterval(async () => {
+    autodpInterval = setInterval(async () => {
       try {
-        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m`);
-        const weatherData = await weatherRes.json();
-        const temperature = weatherData.current.temperature_2m;
+        const quoted = await msg.getContact();
+        const pfp = await client.profilePictureUrl(quoted.id._serialized, 'image');
+        const res = await fetch(pfp);
+        const buffer = Buffer.from(await res.arrayBuffer());
+
+        const weatherRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${CITY}`);
+        const { results } = await weatherRes.json();
+        if (!results || results.length === 0) throw new Error('City not found');
+        const { latitude, longitude } = results[0];
+
+        const weather = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m`);
+        const { current } = await weather.json();
+        const temperature = current.temperature_2m;
 
         const now = new Date();
-        const formattedTime = now.toLocaleString('en-IN', {
-          weekday: 'short',
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: true
-        });
+        const day = now.toLocaleDateString('en-GB', { weekday: 'short' });
+        const date = now.toLocaleDateString('en-GB').replace(/\//g, '.');
+        const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        const ampm = now.toLocaleTimeString('en-US', { hour: '2-digit' }).includes('AM') ? 'A.M' : 'P.M';
 
-        const finalText = `${formattedTime} ${temperature} °C`;
+        const finalText = `${day} ${date} ${time} ${ampm} ${temperature}°C`;
 
-        const profilePic = await msg.author.getProfilePicUrl();
-        const inputImage = path.resolve('./dp.jpg');
-        const outputImage = path.resolve('./dp-out.jpg');
-
-        const imgBuffer = await fetch(profilePic).then(res => res.buffer());
-        await fs.writeFile(inputImage, imgBuffer);
-
-        const image = sharp(inputImage);
+        const image = sharp(buffer);
         const metadata = await image.metadata();
-        const { width, height } = metadata;
+        const width = metadata.width;
+        const height = metadata.height;
 
         const canvas = createCanvas(width, height);
         const ctx = canvas.getContext('2d');
@@ -69,29 +63,25 @@ export default {
         ctx.clearRect(0, 0, width, height);
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font = 'bold 52px "Lobster"';
+        ctx.font = 'bold 52px FancyFont';
         ctx.fillStyle = 'white';
         ctx.shadowColor = 'rgba(0,0,0,0.5)';
         ctx.shadowBlur = 8;
-
         ctx.fillText(finalText, width / 2 - 15, height - 250);
 
         const overlayBuffer = canvas.toBuffer();
 
-        await sharp(inputImage)
+        const outputPath = path.join(__dirname, '../temp/profile.jpg');
+        await sharp(buffer)
           .composite([{ input: overlayBuffer, top: 0, left: 0 }])
           .jpeg({ quality: 100 })
-          .toFile(outputImage);
+          .toFile(outputPath);
 
-        await client.setProfilePicture(outputImage);
-        console.log('✅ DP updated!');
+        await client.updateProfilePicture(msg.from, fs.readFileSync(outputPath));
+        console.log('✅ Profile picture updated');
       } catch (err) {
-        console.error('❌ AutoDP Error:', err.message);
+        console.error('❌ Error in AutoDP:', err.message);
       }
     }, AUTO_DP_INTERVAL);
-
-    await msg.reply('✅ AutoDP started!');
   }
 };
-
-export { interval as autodpInterval };
