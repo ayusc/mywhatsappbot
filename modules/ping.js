@@ -7,7 +7,7 @@ export default {
     
     const end = Date.now();
 
-    ping = await msg.reply('Pong !');
+    const ping = await msg.reply('Pong !');
     
     const timeTaken = end - start;
     
