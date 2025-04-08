@@ -14,22 +14,23 @@ export default {
       if (interval) {
         clearInterval(interval);
         interval = null;
-        await msg.delete(true, true);
         msg.reply('🛑 AutoBio stopped.');
-      } else {
         await msg.delete(true, true);
+      } else {
         msg.reply('ℹ️ AutoBio is not running.');
+        await msg.delete(true, true);
       }
       return;
     }
 
     if (interval) {
-      await msg.delete(true, true);
       msg.reply('⚠️ AutoBio is already running!');
+      await msg.delete(true, true);
       return;
     }
-    await msg.delete(true, true);
+
     msg.reply(`✅ AutoBio started! Updating about every ${AUTO_BIO_INTERVAL / 1000} seconds.`);
+    await msg.delete(true, true);
 
     interval = setInterval(async () => {
       try {
