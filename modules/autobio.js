@@ -13,12 +13,10 @@ export default {
 
     if (interval) {
       await msg.reply('⚠️ AutoBio is already running!');
-      await msg.delete(true, true);
       return;
     }
 
     await msg.reply(`✅ AutoBio started! Updating about every ${AUTO_BIO_INTERVAL / 1000} seconds.`);
-    await msg.delete(true, true);
 
     interval = setInterval(async () => {
       try {
@@ -39,4 +37,4 @@ export default {
   }
 };
 
-export { interval }; // If you want to control it from another file
+export { interval };
