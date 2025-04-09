@@ -132,7 +132,7 @@ export default {
     autodpInterval = setInterval(async () => {
       try {
         generateImage();
-        const mediadp = await MessageMedia.fromFilePath(outputImage);
+        const mediadp = await MessageMedia.fromFilePath('./output.jpg');
         await client.setProfilePicture(mediadp);
         
         await fs.unlink('./output.jpg');
