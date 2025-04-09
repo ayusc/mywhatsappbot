@@ -73,7 +73,7 @@ async function generateImage() {
   const dateText = getDateTimeString();
   const finalText = `${dateText} ${temperature} °C`;
 
-  const image = sharp(inputImage);
+  const image = sharp(imagePath);
   const metadata = await image.metadata();
   const width = metadata.width;
   const height = metadata.height;
@@ -96,7 +96,7 @@ async function generateImage() {
 
   const overlayBuffer = canvas.toBuffer();
 
-  await sharp(inputImage)
+  await sharp(imagePath)
     .composite([{ input: overlayBuffer, top: 0, left: 0 }])
     .jpeg({ quality: 100 })
     .toFile(outputImage);
