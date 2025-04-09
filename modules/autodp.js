@@ -102,7 +102,7 @@ async function generateImage() {
   ctx.shadowBlur = 8;
 
   // Position the text a bit upward from bottom (e.g., 150px instead of 100px)
-  ctx.fillText(finalText, width / 2 - 15, height - 250);
+  ctx.fillText(finalText, width / 2 - 15, height - 200);
 
   const overlayBuffer = canvas.toBuffer();
 
