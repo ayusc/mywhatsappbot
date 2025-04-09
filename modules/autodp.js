@@ -48,7 +48,7 @@ async function ensureFontDownloaded() {
 
 const imageUrl = process.env.IMAGE_URL || 'https://raw.githubusercontent.com/ayusc/mywhatsappbot/main/dp.jpg';
 const imagePath = path.join(__dirname, 'dp.jpg');
-const outputImage = 'output.jpg';
+const outputImage = path.join(__dirname, 'output.jpg');
 
 async function downloadImage() {
   const file = fs.createWriteStream(imagePath);
@@ -132,7 +132,7 @@ export default {
     autodpInterval = setInterval(async () => {
       try {
         generateImage();
-        const mediadp = await MessageMedia.fromFilePath('./output.jpg');
+        const mediadp = await MessageMedia.fromFilePath(outputImage);
         await client.setProfilePicture(mediadp);
         
         await fs.unlink('./output.jpg');
