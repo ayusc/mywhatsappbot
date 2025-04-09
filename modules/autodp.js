@@ -10,6 +10,7 @@ const __dirname = path.dirname(__filename);
 
 const fontPath = path.join(__dirname, 'font.ttf');
 const city = process.env.CITY || 'Kolkata';
+export let autodpInterval = null;
 
 async function ensureFontDownloaded() {
   if (!fs.existsSync(fontPath) || fs.statSync(fontPath).size < 10000) {
@@ -24,8 +25,6 @@ async function ensureFontDownloaded() {
     });
   }
 }
-
-registerFont('./font.ttf', { family: 'FancyFont' });
 
 const imageUrl = process.env.IMAGE_URL || 'https://raw.githubusercontent.com/ayusc/mywhatsappbot/main/dp.jpg';
 const imagePath = path.join(__dirname, 'dp.jpg');
@@ -93,11 +92,11 @@ ensureFontDownloaded().then(() => {
   console.log('Font downloaded successfully!');
 }).catch(console.error);
 
+registerFont(fontPath, { family: 'FancyFont' });
+
 downloadImage().then(() => {
   console.log('Profile pic downloaded as dp.jpg');
 }).catch(console.error);
-
-export let autodpInterval = null;
 
 export default {
   name: '.autodp',
