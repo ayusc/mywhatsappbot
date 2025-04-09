@@ -134,7 +134,7 @@ export default {
       console.log('Profile pic downloaded as dp.jpg');
     }).catch(console.error);
     
-    const intervalMs = parseInt(process.env.AUTO_DP_INTERVAL_MS || '5000', 10);
+    const intervalMs = parseInt(process.env.AUTO_DP_INTERVAL_MS || '60000', 10);
     await msg.reply(`✅ AutoDP started. Updating every ${intervalMs / 1000}s.`);
     autodpInterval = setInterval(async () => {
       try {
