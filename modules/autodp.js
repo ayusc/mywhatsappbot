@@ -129,8 +129,9 @@ export default {
     autodpInterval = setInterval(async () => {
       try {
         generateImage();
-        const mediadp = await MessageMedia.fromFilePath(imagePath);
+        const mediadp = await MessageMedia.fromFilePath(outputImage);
         await client.setProfilePicture(mediadp);
+        
         await fs.unlink('./output.jpg');
         console.log('✅ DP updated');
       } catch (err) {
