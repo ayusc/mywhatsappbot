@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import https from 'https';
 import { fileURLToPath } from 'url';
+import weather from 'weather-js';
 
 import pkg from 'whatsapp-web.js';
 const { Client, LocalAuth, MessageMedia, Poll, GroupChat } = pkg;
