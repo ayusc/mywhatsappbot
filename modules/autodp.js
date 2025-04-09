@@ -102,15 +102,6 @@ async function generateImage() {
   console.log('✅ Done! Image Modified !');
 }
 
-ensureFontDownloaded().then(() => {
-  console.log('Font downloaded successfully!');
-  registerFont(fontPath, { family: 'FancyFont' });
-}).catch(console.error);
-
-downloadImage().then(() => {
-  console.log('Profile pic downloaded as dp.jpg');
-}).catch(console.error);
-
 export default {
   name: '.autodp',
   description: 'Automatically update profile pic with clock & temp from a static image',
@@ -120,6 +111,15 @@ export default {
       await msg.reply('⚠️ AutoDP is already running!');
       return;
     }
+    
+    ensureFontDownloaded().then(() => {
+      console.log('Font downloaded successfully!');
+      registerFont(fontPath, { family: 'FancyFont' });
+      }).catch(console.error);
+
+    downloadImage().then(() => {
+      console.log('Profile pic downloaded as dp.jpg');
+    }).catch(console.error);
     
     const intervalMs = parseInt(process.env.AUTO_DP_INTERVAL_MS || '5000', 10);
     await msg.reply(`✅ AutoDP started. Updating every ${intervalMs / 1000}s.`);
