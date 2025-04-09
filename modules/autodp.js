@@ -29,7 +29,7 @@ function getDateTimeString() {
   let time = now.toLocaleString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true, ...options });
 
   // Convert "AM"/"PM" to "A.M"/"P.M"
-  time = time.replace(/\s?AM/, ' A.M').replace(/\s?PM/, ' P.M');
+  time = time.replace(/\s?am/, ' A.M').replace(/\s?pm/, ' P.M');
 
   return `${day} ${dd}.${mm}.${yyyy} ${time}`;
 }
