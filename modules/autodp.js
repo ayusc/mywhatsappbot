@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import https from 'https';
 import { fileURLToPath } from 'url';
+import MessageMedia from 'whatsapp-web.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -128,7 +129,8 @@ export default {
     autodpInterval = setInterval(async () => {
       try {
         generateImage();
-        await client.setProfilePicture('./output.jpg');
+        const mediadp = MessageMedia.fromFilePath(imagePath);
+        await client.setProfilePicture(mediadp);
         await fs.unlink('./output.jpg');
         console.log('✅ DP updated');
       } catch (err) {
