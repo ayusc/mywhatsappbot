@@ -131,11 +131,11 @@ export default {
     await msg.reply(`✅ AutoDP started. Updating every ${intervalMs / 1000}s.`);
     autodpInterval = setInterval(async () => {
       try {
-        generateImage();
+        await generateImage();
         const mediadp = await MessageMedia.fromFilePath(outputImage);
         await client.setProfilePicture(mediadp);
-        
         await fs.unlink('./output.jpg');
+        
         console.log('✅ DP updated');
       } catch (err) {
         console.error('❌ Error in AutoDP:', err.message);
