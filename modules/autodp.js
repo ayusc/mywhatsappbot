@@ -19,20 +19,16 @@ const fontPath = path.join(__dirname, 'Lobster-Regular.ttf');
 const fontUrl = 'https://raw.githubusercontent.com/google/fonts/main/ofl/lobster/Lobster-Regular.ttf';
 
 function getDateTimeString() {
-  const now = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-  const date = new Date(now);
+  const options = { timeZone: 'Asia/Kolkata', hour12: true };
+  const now = new Date();
 
-  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const day = dayNames[date.getDay()];
-  const dd = String(date.getDate()).padStart(2, '0');
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  const yyyy = date.getFullYear();
-  let hours = date.getHours();
-  const mins = String(date.getMinutes()).padStart(2, '0');
-  const ampm = hours >= 12 ? 'P.M' : 'A.M';
-  hours = hours % 12 || 12;
+  const day = now.toLocaleString('en-IN', { weekday: 'short', ...options });
+  const dd = now.toLocaleString('en-IN', { day: '2-digit', ...options });
+  const mm = now.toLocaleString('en-IN', { month: '2-digit', ...options });
+  const yyyy = now.toLocaleString('en-IN', { year: 'numeric', ...options });
+  const time = now.toLocaleString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true, ...options });
 
-  return `${day} ${dd}.${mm}.${yyyy} ${hours}:${mins} ${ampm}`;
+  return `${day} ${dd}.${mm}.${yyyy} ${time.replace(' ', '')}`;
 }
 
 async function ensureFontDownloaded() {
