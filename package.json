@@ -17,7 +17,8 @@
     "wwebjs-mongo": "^1.0.5",
     "node-fetch": "^3.3.2",
     "canvas": "^2.11.2",
-    "sharp": "^0.33.4"
+    "sharp": "^0.33.4",
+    "weather-js": "latest"
   }
 }
 
