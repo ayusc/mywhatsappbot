@@ -18,16 +18,19 @@ const fontPath = path.join(__dirname, 'Lobster-Regular.ttf');
 const fontUrl = 'https://raw.githubusercontent.com/google/fonts/main/ofl/lobster/Lobster-Regular.ttf';
 
 function getDateTimeString() {
-  const now = new Date();
+  const now = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+  const date = new Date(now);
+
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const day = dayNames[now.getDay()];
-  const dd = String(now.getDate()).padStart(2, '0');
-  const mm = String(now.getMonth() + 1).padStart(2, '0');
-  const yyyy = now.getFullYear();
-  let hours = now.getHours();
-  const mins = String(now.getMinutes()).padStart(2, '0');
+  const day = dayNames[date.getDay()];
+  const dd = String(date.getDate()).padStart(2, '0');
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const yyyy = date.getFullYear();
+  let hours = date.getHours();
+  const mins = String(date.getMinutes()).padStart(2, '0');
   const ampm = hours >= 12 ? 'P.M' : 'A.M';
   hours = hours % 12 || 12;
+
   return `${day} ${dd}.${mm}.${yyyy} ${hours}:${mins} ${ampm}`;
 }
 
@@ -63,13 +66,16 @@ async function downloadImage() {
 }
 
 async function getWeather() {
-  const locationRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${city}`);
-  const locationData = await locationRes.json();
-  const { latitude, longitude } = locationData.results?.[0] || {};
-  if (!latitude || !longitude) return console.log('❌ Could not find city coordinates');
-  const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m&timezone=auto`);
-  const data = await res.json();
-  return data.current.temperature_2m;
+  return new Promise((resolve, reject) => {
+    weather.find({ search: city, degreeType: 'C' }, function (err, result) {
+      if (err || !result || result.length === 0) {
+        console.log('❌ Failed to get weather:', err?.message || 'No results');
+        return resolve('N/A');
+      }
+      const temp = result[0].current.temperature;
+      resolve(temp);
+    });
+  });
 }
 
 async function generateImage() {
