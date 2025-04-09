@@ -8,9 +8,10 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const fontPath = path.join(__dirname, 'font.ttf');
 const city = process.env.CITY || 'Kolkata';
 export let autodpInterval = null;
+const fontPath = path.join(__dirname, 'Lobster-Regular.ttf');
+const fontUrl = 'https://raw.githubusercontent.com/google/fonts/main/ofl/lobster/Lobster-Regular.ttf';
 
 function getDateTimeString() {
   const now = new Date();
@@ -25,9 +26,6 @@ function getDateTimeString() {
   hours = hours % 12 || 12;
   return `${day} ${dd}.${mm}.${yyyy} ${hours}:${mins} ${ampm}`;
 }
-
-const fontPath = path.join(__dirname, 'Lobster-Regular.ttf');
-const fontUrl = 'https://raw.githubusercontent.com/google/fonts/main/ofl/lobster/Lobster-Regular.ttf';
 
 async function ensureFontDownloaded() {
   if (fs.existsSync(fontPath) && fs.statSync(fontPath).size >= 10000) return;
