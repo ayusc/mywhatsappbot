@@ -5,7 +5,10 @@ import fs from 'fs';
 import path from 'path';
 import https from 'https';
 import { fileURLToPath } from 'url';
-import { Client, MessageMedia } from 'whatsapp-web.js';
+
+import pkg from 'whatsapp-web.js';
+const { Client, LocalAuth, MessageMedia, Poll, GroupChat } = pkg;
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
