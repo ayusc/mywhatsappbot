@@ -3,7 +3,7 @@ import sharp from 'sharp';
 import { createCanvas, registerFont } from 'canvas';
 import fs from 'fs';
 import path from 'path';
-const https = require('https');
+import https from 'https';
 
 const fontPath = path.join(__dirname, 'font.ttf');
 const city = process.env.CITY || 'Kolkata';
