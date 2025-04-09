@@ -13,16 +13,30 @@ const city = process.env.CITY || 'Kolkata';
 export let autodpInterval = null;
 
 async function ensureFontDownloaded() {
-  if (!fs.existsSync(fontPath) || fs.statSync(fontPath).size < 10000) {
-    const file = fs.createWriteStream(fontPath);
-    await new Promise((resolve, reject) => {
-      https.get('https://github.com/google/fonts/raw/main/ofl/lobster/Lobster-Regular.ttf', (res) => {
-        if (res.statusCode !== 200) return reject(new Error(`Failed to download font: ${res.statusCode}`));
-        res.pipe(file);
-        file.on('finish', () => file.close(resolve));
-        file.on('error', reject);
-      }).on('error', reject);
-    });
+  try {
+    if (!fs.existsSync(fontPath) || fs.statSync(fontPath).size < 10000) {
+      console.log('Downloading font...');
+      await new Promise((resolve, reject) => {
+        const file = fs.createWriteStream(fontPath);
+        https.get('https://github.com/google/fonts/raw/main/ofl/lobster/Lobster-Regular.ttf', (res) => {
+          if (res.statusCode !== 200) {
+            file.close();
+            fs.unlinkSync(fontPath); // Clean up
+            return reject(new Error(`Failed to download font: ${res.statusCode}`));
+          }
+          res.pipe(file);
+          file.on('finish', () => file.close(resolve));
+          file.on('error', (err) => {
+            fs.unlinkSync(fontPath); // Clean up on error
+            reject(err);
+          });
+        }).on('error', reject);
+      });
+      console.log('Font downloaded successfully.');
+    }
+  } catch (err) {
+    console.error('Font download error:', err);
+    throw err;
   }
 }
 
