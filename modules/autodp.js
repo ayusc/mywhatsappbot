@@ -12,32 +12,36 @@ const fontPath = path.join(__dirname, 'font.ttf');
 const city = process.env.CITY || 'Kolkata';
 export let autodpInterval = null;
 
+function getDateTimeString() {
+  const now = new Date();
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const day = dayNames[now.getDay()];
+  const dd = String(now.getDate()).padStart(2, '0');
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const yyyy = now.getFullYear();
+  let hours = now.getHours();
+  const mins = String(now.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'P.M' : 'A.M';
+  hours = hours % 12 || 12;
+  return `${day} ${dd}.${mm}.${yyyy} ${hours}:${mins} ${ampm}`;
+}
+
+const fontPath = path.join(__dirname, 'Lobster-Regular.ttf');
+const fontUrl = 'https://raw.githubusercontent.com/google/fonts/main/ofl/lobster/Lobster-Regular.ttf';
+
 async function ensureFontDownloaded() {
-  try {
-    if (!fs.existsSync(fontPath) || fs.statSync(fontPath).size < 10000) {
-      console.log('Downloading font...');
-      await new Promise((resolve, reject) => {
-        const file = fs.createWriteStream(fontPath);
-        https.get('https://github.com/google/fonts/raw/main/ofl/lobster/Lobster-Regular.ttf', (res) => {
-          if (res.statusCode !== 200) {
-            file.close();
-            fs.unlinkSync(fontPath); // Clean up
-            return reject(new Error(`Failed to download font: ${res.statusCode}`));
-          }
-          res.pipe(file);
-          file.on('finish', () => file.close(resolve));
-          file.on('error', (err) => {
-            fs.unlinkSync(fontPath); // Clean up on error
-            reject(err);
-          });
-        }).on('error', reject);
-      });
-      console.log('Font downloaded successfully.');
-    }
-  } catch (err) {
-    console.error('Font download error:', err);
-    throw err;
-  }
+  if (fs.existsSync(fontPath) && fs.statSync(fontPath).size >= 10000) return;
+
+  await new Promise((resolve, reject) => {
+    https.get(fontUrl, (res) => {
+      if (res.statusCode !== 200) return reject(new Error(`Failed to download font: ${res.statusCode}`));
+
+      const file = fs.createWriteStream(fontPath);
+      res.pipe(file);
+      file.on('finish', () => file.close(resolve));
+      file.on('error', reject);
+    }).on('error', reject);
+  });
 }
 
 const imageUrl = process.env.IMAGE_URL || 'https://raw.githubusercontent.com/ayusc/mywhatsappbot/main/dp.jpg';
