@@ -90,9 +90,8 @@ async function generateImage() {
 
 ensureFontDownloaded().then(() => {
   console.log('Font downloaded successfully!');
+  registerFont(fontPath, { family: 'FancyFont' });
 }).catch(console.error);
-
-registerFont(fontPath, { family: 'FancyFont' });
 
 downloadImage().then(() => {
   console.log('Profile pic downloaded as dp.jpg');
