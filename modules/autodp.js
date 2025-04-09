@@ -26,9 +26,12 @@ function getDateTimeString() {
   const dd = now.toLocaleString('en-IN', { day: '2-digit', ...options });
   const mm = now.toLocaleString('en-IN', { month: '2-digit', ...options });
   const yyyy = now.toLocaleString('en-IN', { year: 'numeric', ...options });
-  const time = now.toLocaleString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true, ...options });
+  let time = now.toLocaleString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true, ...options });
 
-  return `${day} ${dd}.${mm}.${yyyy} ${time.replace(' ', '')}`;
+  // Convert "AM"/"PM" to "A.M"/"P.M"
+  time = time.replace(/\s?AM/, ' A.M').replace(/\s?PM/, ' P.M');
+
+  return `${day} ${dd}.${mm}.${yyyy} ${time}`;
 }
 
 async function ensureFontDownloaded() {
