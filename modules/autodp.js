@@ -131,18 +131,40 @@ export default {
     }).catch(console.error);
     
     const intervalMs = parseInt(process.env.AUTO_DP_INTERVAL_MS || '60000', 10);
-    await msg.reply(`✅ AutoDP started. Updating every ${intervalMs / 1000}s.`);
-    autodpInterval = setInterval(async () => {
-      try {
-        await generateImage();
-        const mediadp = await MessageMedia.fromFilePath(outputImage);
-        await client.setProfilePicture(mediadp);
-        await fs.unlink('./output.jpg');
-        
-        console.log('✅ DP updated');
-      } catch (err) {
-        console.error('❌ Error in AutoDP:', err.message);
-      }
-    }, intervalMs);
+    await msg.reply(`✅ AutoDP started. Updating every ${intervalMs / 1000}s`);
+    
+    // Calculate IST-based delay to next interval start
+    const now = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+    const date = new Date(now);
+    const seconds = date.getSeconds();
+    const millisUntilNextInterval = intervalMs - (seconds * 1000) % intervalMs;
+    
+    setTimeout(() => {
+      // Start interval
+      autodpInterval = setInterval(async () => {
+        try {
+          await generateImage();
+          const mediadp = await MessageMedia.fromFilePath(outputImage);
+          await client.setProfilePicture(mediadp);
+          await fs.unlink('./output.jpg');
+    
+          console.log('✅ DP updated');
+        } catch (err) {
+          console.error('❌ Error in AutoDP:', err.message);
+        }
+      }, intervalMs);
+    
+      // Do the first update exactly on sync
+      generateImage()
+        .then(async () => {
+          const mediadp = await MessageMedia.fromFilePath(outputImage);
+          await client.setProfilePicture(mediadp);
+          await fs.unlink('./output.jpg');
+          console.log('✅ First synced DP update done');
+        })
+        .catch(err => console.error('❌ Error in first AutoDP run:', err.message));
+    
+    }, millisUntilNextInterval);
+
   }
 };
