@@ -1,4 +1,5 @@
-const axios = require("axios");
+import axios from 'axios';
+import dotenv from 'dotenv';
 
 // These are set automatically by GitHub Actions
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN; 
@@ -6,6 +7,7 @@ const REPO_OWNER = process.env.GITHUB_REPOSITORY.split("/")[0];
 const REPO_NAME = process.env.GITHUB_REPOSITORY.split("/")[1];
 const CURRENT_RUN_ID = process.env.GITHUB_RUN_ID;
 const BRANCH = "main";
+dotenv.config();
 
 async function cancelWorkflowRun(runId) {
   const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/runs/${runId}/cancel`;
