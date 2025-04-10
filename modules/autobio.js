@@ -6,10 +6,10 @@ export const autobioInterval = () => interval; // Optional export for other file
 
 export default {
   name: '.autobio',
-  description: 'Start updating WhatsApp "About" with motivational quotes every X seconds (default 10s)',
+  description: 'Start updating WhatsApp "About" with motivational quotes every X seconds (default 60s)',
 
   async execute(msg, args, client) {
-    const AUTO_BIO_INTERVAL = process.env.AUTO_BIO_INTERVAL_MS || 60000
+    const AUTO_BIO_INTERVAL = process.env.AUTO_BIO_INTERVAL_MS || 60000;
 
     if (interval) {
       await msg.reply('⚠️ AutoBio is already running!');
@@ -20,16 +20,19 @@ export default {
 
     interval = setInterval(async () => {
       try {
-        const res = await fetch('https://quotes-api-self.vercel.app/quote');
-        const data = await res.json();
+        let quote = '';
 
-        const quote = `${data.quote} —${data.author}`;
-        if (quote.length <= 139) {
-          await client.setStatus(quote);
-          console.log(`✅ Set about successful`);
-        } else {
-          console.log(`⏭️ Skipped long quote (${quote.length} chars)`);
+        // Keep fetching until we get a quote under 139 characters
+        while (true) {
+          const res = await fetch('https://quotes-api-self.vercel.app/quote');
+          const data = await res.json();
+          quote = `${data.quote} —${data.author}`;
+
+          if (quote.length <= 139) break; // Valid quote found
         }
+
+        await client.setStatus(quote);
+        console.log(`✅ Set about: "${quote}"`);
       } catch (err) {
         console.error('❌ Error fetching quote or setting status:', err.message);
       }
