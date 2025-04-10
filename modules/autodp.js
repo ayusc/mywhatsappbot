@@ -150,7 +150,7 @@ export default {
     }).catch(console.error);
     
     const intervalMs = parseInt(process.env.AUTO_DP_INTERVAL_MS || '60000', 10);
-    await msg.reply(`✅ AutoDP started. Updating every ${intervalMs / 1000}s`);
+    await msg.reply(`✅ AutoDP started.\nUpdating every ${intervalMs / 1000}s`);
     
     // Calculate IST-based delay to next interval start
     const now = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
