@@ -16,7 +16,7 @@ export default {
       return;
     }
 
-    await msg.reply(`✅ AutoDP started.\nUpdating every ${AUTO_BIO_INTERVAL / 1000}s`);
+    await msg.reply(`✅ AutoBio started.\nUpdating every ${AUTO_BIO_INTERVAL / 1000}s`);
 
     // Calculate delay until the next aligned interval
     const now = Date.now();
