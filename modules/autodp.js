@@ -77,7 +77,6 @@ async function getWeather() {
       const forecast = result[0].forecast[0]; // Today's forecast
 
       const weatherDetails = {
-        location: result[0].location.name,
         temperature: current.temperature + '°C',
         feelsLike: current.feelslike + '°C',
         sky: current.skytext,
@@ -85,7 +84,6 @@ async function getWeather() {
         humidity: current.humidity + '%',
         forecastText: forecast.skytextday,
         rainChance: forecast.precip + '%',
-        date: forecast.date,
       };
 
       resolve(weatherDetails);
@@ -97,7 +95,7 @@ async function generateImage() {
   const weatherInfo = await getWeather(); 
   
   const dateText = getDateTimeString();
-  const finalText = `		${dateText} ${weatherInfo.temperature} (Feels Like ${weatherInfo.feelsLike})\n	Wind ${weatherInfo.windSpeed}, Humidity ${weatherInfo.humidity}, Rainfall Chances ${weatherInfo.rainChance}\n		Current Condtions: ${weatherInfo.sky}, Forecast: ${weatherInfo.forecastText}`;
+  const finalText = `		${dateText} ${weatherInfo.temperature} (Feels Like ${weatherInfo.feelsLike}), ${city}\n	Wind ${weatherInfo.windSpeed}, Humidity ${weatherInfo.humidity}, Rainfall Chances ${weatherInfo.rainChance}\n		Current Condtions: ${weatherInfo.sky}, Forecast: ${weatherInfo.forecastText}`;
 
   const image = sharp(imagePath);
   const metadata = await image.metadata();
