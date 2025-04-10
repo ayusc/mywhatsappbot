@@ -1,14 +1,14 @@
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 
 let interval = null;
 
-const autobioInterval = () => interval;
+export const autobioInterval = () => interval;
 
-module.exports = {
+export default {
   name: '.autobio',
   description: 'Start updating WhatsApp "About" with motivational quotes every X seconds (default 60s)',
 
-  execute: async (msg, args, client) => {
+  async execute(msg, args, client) {
     const AUTO_BIO_INTERVAL = process.env.AUTO_BIO_INTERVAL_MS || 60000;
 
     if (interval) {
@@ -39,10 +39,6 @@ module.exports = {
           console.error('❌ Error fetching quote or setting status:', err.message);
         }
       }, AUTO_BIO_INTERVAL);
-
-      console.log('⏱️ AutoBio started at:', new Date().toLocaleTimeString());
     }, delayUntilNextMinute);
-  },
-
-  autobioInterval // exported for access in other files (like for .stopbio)
+  }
 };
