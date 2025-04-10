@@ -175,13 +175,13 @@ export default {
     
       // Do the first update exactly on sync
       generateImage()
-        .then(async () => {
-          const mediadp = await MessageMedia.fromFilePath(outputImage);
-          await client.setProfilePicture(mediadp);
-          await fs.unlink('./output.jpg');
-          console.log('✅ First synced DP update done');
-        })
-        .catch(err => console.error('❌ Error in first AutoDP run:', err.message));
+      .then(async () => {
+        const mediadp = await MessageMedia.fromFilePath(outputImage);
+        await client.setProfilePicture(mediadp);
+        await fs.unlink('./output.jpg');
+        console.log('✅ First synced DP update done');
+      })
+      .catch(() => {});
     
     }, millisUntilNextInterval);
 
