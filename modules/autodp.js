@@ -97,7 +97,7 @@ async function generateImage() {
   const weatherInfo = await getWeather(); 
   
   const dateText = getDateTimeString();
-  const finalText = `${dateText} ${weatherInfo.temperature} (Feels Like ${weatherInfo.feelsLike})\nWind ${weatherInfo.windSpeed}, Humidity ${weatherInfo.humidity}, Rainfall Chances ${weatherInfo.rainChance}\nCurrent Condtions: ${weatherInfo.sky}, Forecast: ${weatherInfo.forecastText}`;
+  const finalText = `		${dateText} ${weatherInfo.temperature} (Feels Like ${weatherInfo.feelsLike})\n	Wind ${weatherInfo.windSpeed}, Humidity ${weatherInfo.humidity}, Rainfall Chances ${weatherInfo.rainChance}\n		Current Condtions: ${weatherInfo.sky}, Forecast: ${weatherInfo.forecastText}`;
 
   const image = sharp(imagePath);
   const metadata = await image.metadata();
@@ -127,7 +127,7 @@ async function generateImage() {
     .jpeg({ quality: 100 })
     .toFile(outputImage);
 
-  console.log('✅ Done! Image Modified !');
+  //console.log('✅ Done! Image Modified !');
 }
 
 export default {
@@ -179,7 +179,7 @@ export default {
         const mediadp = await MessageMedia.fromFilePath(outputImage);
         await client.setProfilePicture(mediadp);
         await fs.unlink('./output.jpg');
-        console.log('✅ First synced DP update done');
+        //console.log('✅ First synced DP update done');
       })
       .catch(() => {});
     
