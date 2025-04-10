@@ -67,21 +67,37 @@ async function downloadImage() {
 
 async function getWeather() {
   return new Promise((resolve, reject) => {
-    weather.find({ search: city, degreeType: 'C' }, function (err, result) {
+    weather.find({ search: 'Kolkata', degreeType: 'C' }, function (err, result) {
       if (err || !result || result.length === 0) {
         console.log('❌ Failed to get weather:', err?.message || 'No results');
-        return resolve('N/A');
+        return resolve(null);
       }
-      const temp = result[0].current.temperature;
-      resolve(temp);
+
+      const current = result[0].current;
+      const forecast = result[0].forecast[0]; // Today's forecast
+
+      const weatherDetails = {
+        location: result[0].location.name,
+        temperature: current.temperature + '°C',
+        feelsLike: current.feelslike + '°C',
+        sky: current.skytext,
+        windSpeed: current.winddisplay,
+        humidity: current.humidity + '%',
+        forecastText: forecast.skytextday,
+        rainChance: forecast.precip + '%',
+        date: forecast.date,
+      };
+
+      resolve(weatherDetails);
     });
   });
 }
 
 async function generateImage() {
-  const temperature = await getWeather();
+  const weatherInfo = await getWeather(); 
+  
   const dateText = getDateTimeString();
-  const finalText = `${dateText} ${temperature} °C`;
+  const finalText = `${dateText} ${weatherInfo.temperature} (Feels Like ${weatherInfo.feelsLike})\nWind ${weatherInfo.windSpeed}, Humidity ${weatherInfo.humidity}, Rainfall Chances ${weatherInfo.rainChance}\nCurrent Condtions: ${weatherInfo.sky}, Forecast: ${weatherInfo.forecastText}`;
 
   const image = sharp(imagePath);
   const metadata = await image.metadata();
