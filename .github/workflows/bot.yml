@@ -19,12 +19,12 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Run 6-Hour Restart Script (in background)
+      - name: Start Polling
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node newaction.js &
 
-      - name: Run Bot (in foreground, keeps job alive)
+      - name: Run Bot 
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
         run: npm start
