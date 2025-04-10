@@ -9,15 +9,20 @@ export default {
   description: 'Start updating WhatsApp "About" with motivational quotes every X seconds (default 60s)',
 
   async execute(msg, args, client) {
-    const AUTO_BIO_INTERVAL = process.env.AUTO_BIO_INTERVAL_MS || 60000;
+  const AUTO_BIO_INTERVAL = process.env.AUTO_BIO_INTERVAL_MS || 60000;
 
-    if (interval) {
-      await msg.reply('⚠️ AutoBio is already running!');
-      return;
-    }
+  if (interval) {
+    await msg.reply('⚠️ AutoBio is already running!');
+    return;
+  }
 
-    await msg.reply(`✅ AutoBio started! Updating about every ${AUTO_BIO_INTERVAL / 1000} seconds.`);
+  // Calculate the delay until the next full minute
+  const now = new Date();
+  const delayUntilNextMinute = 60000 - (now.getSeconds() * 1000 + now.getMilliseconds());
 
+  await msg.reply(`✅ AutoBio started!\nUpdating About every ${AUTO_BIO_INTERVAL / 1000} seconds.`);
+
+  setTimeout(() => {
     interval = setInterval(async () => {
       try {
         let quote = '';
@@ -27,8 +32,7 @@ export default {
           const res = await fetch('https://quotes-api-self.vercel.app/quote');
           const data = await res.json();
           quote = `${data.quote} —${data.author}`;
-
-          if (quote.length <= 139) break; // Valid quote found
+          if (quote.length <= 139) break;
         }
 
         await client.setStatus(quote);
@@ -37,7 +41,9 @@ export default {
         console.error('❌ Error fetching quote or setting status:', err.message);
       }
     }, AUTO_BIO_INTERVAL);
-  }
-};
+
+    console.log('⏱️ AutoBio started at:', new Date().toLocaleTimeString());
+  }, delayUntilNextMinute);
+}
 
 export { interval };
