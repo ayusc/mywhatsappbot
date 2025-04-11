@@ -3,7 +3,7 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const GITHUB_TOKEN = process.env.GITTOKEN;
 const [REPO_OWNER, REPO_NAME] = process.env.GITHUB_REPOSITORY.split('/');
 const CURRENT_RUN_ID = process.env.GITHUB_RUN_ID;
 const BRANCH = 'main';
