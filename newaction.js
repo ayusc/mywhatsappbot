@@ -34,7 +34,7 @@ async function cancelWorkflowRun(runId) {
 }
 
 async function dispatchWorkflow() {
-  const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/workflows/main.yml/dispatches`;
+  const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/workflows/bot.yml/dispatches`;
 
   try {
     await axios.post(
