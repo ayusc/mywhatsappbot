@@ -108,7 +108,7 @@ async function generateImage() {
   ctx.clearRect(0, 0, width, height);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.font = 'bold 30px FancyFont';
+  ctx.font = 'bold 35px FancyFont';
   ctx.fillStyle = 'white';
 
   // Add shadow for better visibility
