@@ -13,7 +13,7 @@ const { Client, LocalAuth, MessageMedia, Poll, GroupChat } = pkg;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const city = process.env.CITY || 'Kolkata';
+const city = process.env.CITY || 'Panihati';
 export let autodpInterval = null;
 const fontPath = path.join(__dirname, 'Lobster-Regular.ttf');
 const fontUrl = 'https://raw.githubusercontent.com/google/fonts/main/ofl/lobster/Lobster-Regular.ttf';
@@ -67,7 +67,7 @@ async function downloadImage() {
 
 async function getWeather() {
   return new Promise((resolve, reject) => {
-    weather.find({ search: 'Kolkata', degreeType: 'C' }, function (err, result) {
+    weather.find({ search: , degreeType: 'C' }, function (err, result) {
       if (err || !result || result.length === 0) {
         console.log('❌ Failed to get weather:', err?.message || 'No results');
         return resolve(null);
