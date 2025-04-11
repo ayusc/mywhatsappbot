@@ -22,4 +22,5 @@ jobs:
       - name: Run Bot 
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
+          GITTOKEN: ${{ secrets.GITTOKEN }} 
         run: npm start
