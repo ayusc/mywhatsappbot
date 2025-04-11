@@ -19,11 +19,6 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Start Polling
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node newaction.js &
-
       - name: Run Bot 
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
