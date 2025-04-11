@@ -8,11 +8,6 @@ const [REPO_OWNER, REPO_NAME] = process.env.GITHUB_REPOSITORY.split('/');
 const CURRENT_RUN_ID = process.env.GITHUB_RUN_ID;
 const BRANCH = 'main';
 
-console.log(GITHUB_TOKEN)
-console.log(CURRENT_RUN_ID)
-console.log(REPO_OWNER)
-console.log(REPO_NAME)
-
 async function cancelWorkflowRun(runId) {
   const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/runs/${runId}/cancel`;
 
