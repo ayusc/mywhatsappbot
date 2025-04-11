@@ -52,7 +52,7 @@ async function dispatchWorkflow() {
 
 export async function startCountdown() {
   console.log('⏳ Waiting for 6 hours...');
-  await new Promise((resolve) => setTimeout(resolve, 6 * 60 * 60 * 1000)); // 6 hours
+  await new Promise((resolve) => setTimeout(resolve, 10 * 1000));//6 * 60 * 60 * 1000)); // 6 hours
   await cancelWorkflowRun(CURRENT_RUN_ID);
   await dispatchWorkflow();
 }
