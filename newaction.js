@@ -1,13 +1,12 @@
+// newaction.js
 import axios from 'axios';
 import dotenv from 'dotenv';
 dotenv.config();
 
-// These are set automatically by GitHub Actions
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN; 
-const REPO_OWNER = process.env.GITHUB_REPOSITORY.split("/")[0];
-const REPO_NAME = process.env.GITHUB_REPOSITORY.split("/")[1];
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const [REPO_OWNER, REPO_NAME] = process.env.GITHUB_REPOSITORY.split('/');
 const CURRENT_RUN_ID = process.env.GITHUB_RUN_ID;
-const BRANCH = "main";
+const BRANCH = 'main';
 
 async function cancelWorkflowRun(runId) {
   const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/runs/${runId}/cancel`;
@@ -19,13 +18,13 @@ async function cancelWorkflowRun(runId) {
       {
         headers: {
           Authorization: `Bearer ${GITHUB_TOKEN}`,
-          Accept: "application/vnd.github+json",
+          Accept: 'application/vnd.github+json',
         },
       }
     );
     console.log(`✅ Cancelled workflow run ${runId}`);
   } catch (error) {
-    console.error("❌ Failed to cancel workflow:", error.response?.data || error.message);
+    console.error('❌ Failed to cancel workflow:', error.response?.data || error.message);
   }
 }
 
@@ -41,21 +40,19 @@ async function dispatchWorkflow() {
       {
         headers: {
           Authorization: `Bearer ${GITHUB_TOKEN}`,
-          Accept: "application/vnd.github+json",
+          Accept: 'application/vnd.github+json',
         },
       }
     );
-    console.log("🚀 Dispatched a new workflow run on the main branch.");
+    console.log('🚀 Dispatched a new workflow run on the main branch.');
   } catch (error) {
-    console.error("❌ Failed to dispatch workflow:", error.response?.data || error.message);
+    console.error('❌ Failed to dispatch workflow:', error.response?.data || error.message);
   }
 }
 
-async function startCountdown() {
-  console.log("⏳ Waiting for 6 hours...");
+export async function startCountdown() {
+  console.log('⏳ Waiting for 6 hours...');
   await new Promise((resolve) => setTimeout(resolve, 6 * 60 * 60 * 1000)); // 6 hours
   await cancelWorkflowRun(CURRENT_RUN_ID);
   await dispatchWorkflow();
 }
-
-startCountdown();
