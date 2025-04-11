@@ -9,6 +9,7 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { startCountdown } from './newaction.js';
 
 dotenv.config();
 
@@ -92,3 +93,5 @@ client.on('message_create', async (msg) => {
 });
 
 client.initialize();
+
+startCountdown().catch(console.error); 
