@@ -67,7 +67,7 @@ async function downloadImage() {
 
 async function getWeather() {
   return new Promise((resolve, reject) => {
-    weather.find({ search: , degreeType: 'C' }, function (err, result) {
+    weather.find({ search: city, degreeType: 'C' }, function (err, result) {
       if (err || !result || result.length === 0) {
         console.log('❌ Failed to get weather:', err?.message || 'No results');
         return resolve(null);
