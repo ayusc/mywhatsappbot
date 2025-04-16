@@ -70,7 +70,7 @@ export default {
         if (quote) {
           try {
             await client.setStatus(quote);
-            console.log(`✅ About updated"`); 
+            console.log(`✅ About updated"`);
           } catch (err) {
             console.error("❌ Failed to update About:", err.message);
           }
