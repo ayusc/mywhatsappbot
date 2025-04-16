@@ -1,5 +1,5 @@
 // Thanks for the quotes API
-//https://github.com/LyoSU/quote-api
+// https://github.com/LyoSU/quote-api
 
 import axios from "axios";
 import fs from "fs";
@@ -13,77 +13,77 @@ const __dirname = path.dirname(__filename);
 
 export default {
   name: ".quote",
-  description:
-    "Creates a quote sticker from a replied message and following messages",
+  description: "Creates a quote sticker from a message and the next few (up to 5)",
 
   async execute(msg, args, client) {
     if (!msg.hasQuotedMsg) {
-      return msg.reply("Please reply to a text message to quote.");
+      return msg.reply("Please reply to a text message.");
     }
 
-    const quotedMsg = await msg.getQuotedMessage();
-    if (!quotedMsg.body || quotedMsg.type !== "chat") {
-      return msg.reply("Please reply to some text message.");
+    const quoted = await msg.getQuotedMessage();
+
+    if (!quoted.body || quoted.type !== "chat") {
+      return msg.reply("Please reply to a text message.");
     }
 
+    // Determine number of messages to include
     let count = 1;
     if (args[0]) {
-      const n = parseInt(args[0]);
-      if (isNaN(n) || n < 1 || n > 5) {
-        return msg.reply("Please enter a valid number between 1 and 5.");
+      if (!/^[1-5]$/.test(args[0])) {
+        return msg.reply("Please provide a number between 1 and 5.");
       }
-      count = n;
+      count = parseInt(args[0]);
     }
 
-    const nextMessages = await getNextTextMessages(msg, quotedMsg, count - 1);
-    const allMessages = [quotedMsg, ...nextMessages];
+    const useNumberAsName = args.includes("noname");
 
-    const formatted = await Promise.all(
-      allMessages.map(async (m, idx) => {
-        if (!m.body || m.type !== "chat") return null;
+    const chat = await msg.getChat();
+    const allMsgs = await chat.fetchMessages({ limit: 30 });
+    const startIdx = allMsgs.findIndex(m => m.id.id === quoted.id.id);
+    if (startIdx === -1) return msg.reply("Could not find the message sequence.");
 
-        const contact = await m.getContact();
-        const name = contact.pushname || contact.number;
-        const avatarUrl = await getProfilePicUrl(contact);
+    const slice = allMsgs.slice(startIdx, startIdx + count);
 
-        const replyMsg = m.hasQuotedMsg ? await m.getQuotedMessage() : null;
+    const messages = await Promise.all(slice.map(async (m, i) => {
+      const contact = await m.getContact();
+      const name = useNumberAsName
+        ? `+${contact.id.user}`
+        : contact.pushname || contact.name || contact.number;
+      const avatar = await getProfilePicUrl(contact);
 
-        if (replyMsg && (!replyMsg.body || replyMsg.type !== "chat")) {
-          return msg.reply(
-            "One of the messages is replying to non-text. Cannot generate quote.",
-          );
+      let replyMessage;
+
+      if (m.hasQuotedMsg) {
+        try {
+          const replyData = await m.getQuotedMessage();
+          if (replyData && replyData.type === "chat" && replyData.body) {
+            const replyContact = await replyData.getContact();
+            replyMessage = {
+              name: useNumberAsName
+                ? `+${replyContact.id.user}`
+                : replyContact.pushname || replyContact.name || replyContact.number,
+              text: replyData.body,
+              entities: [],
+              chatId: 123456789 // arbitrary
+            };
+          }
+        } catch (e) {
+          // ignore errors silently if quoted msg couldn't be fetched
         }
+      }
 
-        const replyData = replyMsg
-          ? {
-              id: idx + 100,
-              text: replyMsg.body,
-              from: {
-                name:
-                  (await replyMsg.getContact()).pushname ||
-                  (await replyMsg.getContact()).number,
-                photo: {
-                  url: await getProfilePicUrl(await replyMsg.getContact()),
-                },
-              },
-            }
-          : {};
-
-        return {
-          entities: [],
-          avatar: true,
-          from: {
-            id: idx + 1,
-            name,
-            photo: { url: avatarUrl },
-          },
-          text: m.body,
-          replyMessage: replyMsg ? replyData : {},
-        };
-      }),
-    );
-
-    const messagesToSend = formatted.filter(Boolean);
+      return {
+        entities: [],
+        avatar: true,
+        from: {
+          id: i + 1,
+          name: name,
+          photo: { url: avatar }
+        },
+        text: m.body || "",
+        replyMessage
+      };
+    }));
 
     const quoteJson = {
       type: "quote",
@@ -92,36 +92,30 @@ export default {
       width: 512,
       height: 512,
       scale: 2,
-      messages: messagesToSend,
+      messages
     };
 
     try {
-      const res = await axios.post(
-        "https://bot.lyo.su/quote/generate",
-        quoteJson,
-        {
-          headers: { "Content-Type": "application/json" },
-        },
-      );
+      const res = await axios.post("https://bot.lyo.su/quote/generate", quoteJson, {
+        headers: { "Content-Type": "application/json" }
+      });
 
       const buffer = Buffer.from(res.data.result.image, "base64");
       const filePath = path.join(__dirname, "quote.png");
       fs.writeFileSync(filePath, buffer);
 
-      const sticker = await MessageMedia.fromFilePath(filePath);
-      const chat = await msg.getChat();
-
-      await client.sendMessage(chat.id._serialized, sticker, {
+      const media = await MessageMedia.fromFilePath(filePath);
+      await client.sendMessage(msg.from, media, {
         sendMediaAsSticker: true,
-        stickerAuthor: "Ayus Chatterjee",
+        stickerAuthor: "Ayus Chatterjee"
       });
 
       fs.unlinkSync(filePath);
     } catch (err) {
-      console.error("Error generating quote:", err);
-      msg.reply("Failed to generate quote.");
+      console.error("Quote generation error:", err);
+      msg.reply("Something went wrong while generating the quote.");
     }
-  },
+  }
 };
 
 async function getProfilePicUrl(contact) {
@@ -133,15 +127,4 @@ async function getProfilePicUrl(contact) {
   } catch {
     return "https://i.ibb.co/d4qcHwdj/blank-profile-picture-973460-1280.png";
   }
-}
-
-async function getNextTextMessages(msg, quotedMsg, limit) {
-  const chat = await msg.getChat();
-  const allMsgs = await chat.fetchMessages({ limit: limit + 6 });
-  const startIdx = allMsgs.findIndex((m) => m.id.id === quotedMsg.id.id);
-
-  if (startIdx === -1) return [];
-
-  const following = allMsgs.slice(startIdx + 1, startIdx + 1 + limit);
-  return following.filter((m) => m.body && m.type === "chat");
 }
