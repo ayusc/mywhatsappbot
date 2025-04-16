@@ -12,7 +12,7 @@ export default {
     const timeTaken = ((end - start) / 1000).toFixed(3);
 
     //wait for msg to register
-    await new Promise((r) => setTimeout(r, 2000));
+    await new Promise((r) => setTimeout(r, 2500));
 
     await sentMsg.edit(`*Pong !*\nResponse time: ${timeTaken}s`);
   },

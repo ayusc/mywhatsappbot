@@ -59,19 +59,7 @@ export default {
       if (quote) {
         try {
           await client.setStatus(quote);
-          await new Promise((r) => setTimeout(r, 2000));
-          const me = await client.info;
-          const contact = await client.getContactById(me.wid._serialized);
-          const about = await contact.getAbout();
-          //console.log(about);
-          if (about !== quote) {
-            console.log(`✅ About updated"`);
-          } else {
-            //await client.setStatus("‎ ");
-            console.warn(
-              "⚠️ Status change failed. API limit hit.\nConsider increasing your AUTO_BIO_INTERVAL_MS.",
-            );
-          }
+          console.log(`✅ About updated"`);
         } catch (err) {
           console.error("❌ Failed to set initial About status:", err.message);
         }
@@ -82,19 +70,7 @@ export default {
         if (quote) {
           try {
             await client.setStatus(quote);
-            await new Promise((r) => setTimeout(r, 2000));
-            const me = await client.info;
-            const contact = await client.getContactById(me.wid._serialized);
-            const about = await contact.getAbout();
-            //console.log(about)
-            if (about !== quote) {
-              console.log(`✅ About updated"`);
-            } else {
-              //await client.setStatus("‎ ");
-              console.warn(
-                "⚠️ Status change failed. API limit hit.\nConsider increasing your AUTO_BIO_INTERVAL_MS.",
-              );
-            }
+            console.log(`✅ About updated"`); 
           } catch (err) {
             console.error("❌ Failed to update About:", err.message);
           }
