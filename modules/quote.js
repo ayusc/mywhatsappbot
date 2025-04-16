@@ -1,3 +1,6 @@
+// Thanks for the quotes API
+//https://github.com/LyoSU/quote-api
+
 import axios from "axios";
 import fs from "fs";
 import path from "path";
