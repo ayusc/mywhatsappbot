@@ -1,0 +1,28 @@
+name: WhatsApp Bot
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Bot 
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          GITTOKEN: ${{ secrets.GITTOKEN }} 
+          ALWAYS_AUTO_DP: ${{ secrets.ALWAYS_AUTO_DP }} 
+          ALWAYS_AUTO_BIO: ${{ secrets.ALWAYS_AUTO_BIO }} 
+        run: npm start
