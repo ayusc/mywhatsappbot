@@ -5,7 +5,7 @@ dotenv.config();
 const GITHUB_TOKEN = process.env.GITTOKEN;
 const [REPO_OWNER, REPO_NAME] = process.env.GITHUB_REPOSITORY.split('/');
 const CURRENT_RUN_ID = process.env.GITHUB_RUN_ID;
-const BRANCH = 'main';
+const BRANCH = 'main'; // modify if needed
 
 export async function cancelWorkflowRun(runId) {
   const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/runs/${runId}/cancel`;
@@ -43,7 +43,7 @@ export async function dispatchWorkflow() {
         },
       }
     );
-    console.log('🚀 Dispatched a new workflow run on the main branch.');
+    console.log(`🚀 Dispatched a new workflow run on the ${BRANCH} branch.`);
   } catch (error) {
     console.error('❌ Failed to dispatch workflow:', error.response?.data || error.message);
   }
