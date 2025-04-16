@@ -13,7 +13,8 @@ const __dirname = path.dirname(__filename);
 
 export default {
   name: ".quote",
-  description: "Creates a quote sticker from a message and the next few (up to 5)",
+  description:
+    "Creates a quote sticker from a message and the next few (up to 5)",
 
   async execute(msg, args, client) {
     if (!msg.hasQuotedMsg) {
@@ -39,51 +40,56 @@ export default {
 
     const chat = await msg.getChat();
     const allMsgs = await chat.fetchMessages({ limit: 30 });
-    const startIdx = allMsgs.findIndex(m => m.id.id === quoted.id.id);
-    if (startIdx === -1) return msg.reply("Could not find the message sequence.");
+    const startIdx = allMsgs.findIndex((m) => m.id.id === quoted.id.id);
+    if (startIdx === -1)
+      return msg.reply("Could not find the message sequence.");
 
     const slice = allMsgs.slice(startIdx, startIdx + count);
 
-    const messages = await Promise.all(slice.map(async (m, i) => {
-      const contact = await m.getContact();
-      const name = useNumberAsName
-        ? `+${contact.id.user}`
-        : contact.pushname || contact.name || contact.number;
-      const avatar = await getProfilePicUrl(contact);
+    const messages = await Promise.all(
+      slice.map(async (m, i) => {
+        const contact = await m.getContact();
+        const name = useNumberAsName
+          ? `+${contact.id.user}`
+          : contact.pushname || contact.name || contact.number;
+        const avatar = await getProfilePicUrl(contact);
 
-      let replyMessage;
+        let replyMessage;
 
-      if (m.hasQuotedMsg) {
-        try {
-          const replyData = await m.getQuotedMessage();
-          if (replyData && replyData.type === "chat" && replyData.body) {
-            const replyContact = await replyData.getContact();
-            replyMessage = {
-              name: useNumberAsName
-                ? `+${replyContact.id.user}`
-                : replyContact.pushname || replyContact.name || replyContact.number,
-              text: replyData.body,
-              entities: [],
-              chatId: 123456789 // arbitrary
-            };
+        if (m.hasQuotedMsg) {
+          try {
+            const replyData = await m.getQuotedMessage();
+            if (replyData && replyData.type === "chat" && replyData.body) {
+              const replyContact = await replyData.getContact();
+              replyMessage = {
+                name: useNumberAsName
+                  ? `+${replyContact.id.user}`
+                  : replyContact.pushname ||
+                    replyContact.name ||
+                    replyContact.number,
+                text: replyData.body,
+                entities: [],
+                chatId: 123456789, // arbitrary
+              };
+            }
+          } catch (e) {
+            // ignore errors silently if quoted msg couldn't be fetched
           }
-        } catch (e) {
-          // ignore errors silently if quoted msg couldn't be fetched
         }
-      }
 
-      return {
-        entities: [],
-        avatar: true,
-        from: {
-          id: i + 1,
-          name: name,
-          photo: { url: avatar }
-        },
-        text: m.body || "",
-        replyMessage
-      };
-    }));
+        return {
+          entities: [],
+          avatar: true,
+          from: {
+            id: i + 1,
+            name: name,
+            photo: { url: avatar },
+          },
+          text: m.body || "",
+          replyMessage,
+        };
+      }),
+    );
 
     const quoteJson = {
       type: "quote",
@@ -92,13 +98,17 @@ export default {
       width: 512,
       height: 512,
       scale: 2,
-      messages
+      messages,
     };
 
     try {
-      const res = await axios.post("https://bot.lyo.su/quote/generate", quoteJson, {
-        headers: { "Content-Type": "application/json" }
-      });
+      const res = await axios.post(
+        "https://bot.lyo.su/quote/generate",
+        quoteJson,
+        {
+          headers: { "Content-Type": "application/json" },
+        },
+      );
 
       const buffer = Buffer.from(res.data.result.image, "base64");
       const filePath = path.join(__dirname, "quote.png");
@@ -107,7 +117,7 @@ export default {
       const media = await MessageMedia.fromFilePath(filePath);
       await client.sendMessage(msg.from, media, {
         sendMediaAsSticker: true,
-        stickerAuthor: "Ayus Chatterjee"
+        stickerAuthor: "Ayus Chatterjee",
       });
 
       fs.unlinkSync(filePath);
@@ -115,7 +125,7 @@ export default {
       console.error("Quote generation error:", err);
       msg.reply("Something went wrong while generating the quote.");
     }
-  }
+  },
 };
 
 async function getProfilePicUrl(contact) {
