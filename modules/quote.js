@@ -41,7 +41,7 @@ export default {
     const useNumberAsName = arguments_.includes('noname');
 
     const chat = await message.getChat();
-    const allMsgs = await chat.fetchMessages({ limit: 30 });
+    const allMsgs = await chat.fetchMessages({ limit: 20 });
     const startIndex = allMsgs.findIndex(m => m.id.id === quoted.id.id);
     if (startIndex === -1)
       return message.reply('Could not find the message sequence.');
