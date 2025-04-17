@@ -72,9 +72,9 @@ client.on('ready', async () => {
     console.log('✅ WhatsApp is ready!');
     isReady = true;
 
-    const autoDP = process.env.ALWAYS_AUTO_DP;
-    const autobio = process.env.ALWAYS_AUTO_BIO;
-    const SHOW_HOROSCOPE = process.env.SHOW_HOROSCOPE;
+    const autoDP = process.env.ALWAYS_AUTO_DP || "False";
+    const autobio = process.env.ALWAYS_AUTO_BIO || "False";
+    const SHOW_HOROSCOPE = process.env.SHOW_HOROSCOPE || "False";
 
     if (SHOW_HOROSCOPE && SHOW_HOROSCOPE !== 'False') {
       throw new Error('⚠️ SHOW_HOROSCOPE must be "True" or "False" (as string). Received:', autoDP);
