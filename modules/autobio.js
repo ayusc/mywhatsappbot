@@ -39,7 +39,7 @@ export default {
     'Start updating WhatsApp "About" with motivational quotes every X seconds (default 60s)',
 
   async execute(message, arguments_, client) {
-    const AUTO_BIO_INTERVAL = process.env.AUTO_BIO_INTERVAL_MS || 60_000;
+    const AUTO_BIO_INTERVAL = process.env.AUTO_BIO_INTERVAL_MS || 60000;
 
     if (interval) {
       await message.reply('⚠️ AutoBio is already running!');
