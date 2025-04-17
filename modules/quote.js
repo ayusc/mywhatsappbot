@@ -115,7 +115,9 @@ export default {
       fs.writeFileSync(filePath, buffer);
 
       const media = await MessageMedia.fromFilePath(filePath);
-      await client.sendMessage(msg.from, media, {
+      const chat = await msg.getChat();
+
+      await client.sendMessage(chat.id._serialized, media, {
         sendMediaAsSticker: true,
         stickerAuthor: "Ayus Chatterjee",
       });

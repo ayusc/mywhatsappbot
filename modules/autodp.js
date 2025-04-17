@@ -6,15 +6,21 @@ import path from "path";
 import https from "https";
 import { fileURLToPath } from "url";
 import weather from "weather-js";
+import dotenv from 'dotenv';
 
 import pkg from "whatsapp-web.js";
 const { Client, LocalAuth, MessageMedia, Poll, GroupChat } = pkg;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+dotenv.config();
 
-const city = process.env.CITY || "Panihati";
-const ZODIAC_SIGN = "Gemini";
+const city = process.env.CITY || "Kolkata";
+const ZODIAC_SIGN = process.env.ZODIAC_SIGN || "Gemini";
+const TIME_ZONE = process.env.TIME_ZONE || "Asia/Kolkata";
+const imageUrl = process.env.IMAGE_URL || "https://i.ibb.co/d4qcHwdj/blank-profile-picture-973460-1280.png";
+const intervalMs = parseInt(process.env.AUTO_DP_INTERVAL_MS || "60000", 10);
+const SHOW_HOROSCOPE = process.env.SHOW_HOROSCOPE || "False"
 
 export let autodpInterval = null;
 const fontPath = path.join(__dirname, "Lobster-Regular.ttf");
@@ -22,7 +28,7 @@ const fontUrl =
   "https://raw.githubusercontent.com/google/fonts/main/ofl/lobster/Lobster-Regular.ttf";
 
 function getDateTimeString() {
-  const options = { timeZone: "Asia/Kolkata", hour12: true };
+  const options = { timeZone: TIME_ZONE, hour12: true };
   const now = new Date();
 
   const day = now.toLocaleString("en-IN", { weekday: "short", ...options });
@@ -62,7 +68,6 @@ async function ensureFontDownloaded() {
   });
 }
 
-const imageUrl = process.env.IMAGE_URL || "https://i.ibb.co/JRN2RHJs/dp.jpg";
 const imagePath = path.join(__dirname, "dp.jpg");
 const outputImage = path.join(__dirname, "output.jpg");
 
@@ -161,7 +166,6 @@ async function getAQI(cityName) {
 
 async function getHoroscopes() {
   try {
-    const ZODIAC_SIGN = "Gemini";
     const response = await fetch(
       `https://api.api-ninjas.com/v1/horoscope?zodiac=${ZODIAC_SIGN}`,
     );
@@ -226,11 +230,13 @@ Air Quality Index (AQI): ${aqiresult.aqi} (${aqiresult.status})`;
   const x = safePadding;
   let y = 30;
 
-  const horoscopeLine = `Today's Horoscope for ${sign}: ${daily}`;
-  const wrappedLines = wrapText(horoscopeLine, width - safePadding * 2);
-  for (let line of wrappedLines) {
-    ctx.fillText(line, x, y);
-    y += 35;
+  if (process.env.SHOW_HOROSCOPE === "True") {
+    const horoscopeLine = `Today's Horoscope for ${sign}: ${daily}`;
+    const wrappedLines = wrapText(horoscopeLine, width - safePadding * 2);
+    for (let line of wrappedLines) {
+      ctx.fillText(line, x, y);
+      y += 35;
+    }
   }
 
   function wrapText(text, maxWidth) {
@@ -278,12 +284,11 @@ export default {
       })
       .catch(console.error);
 
-    const intervalMs = parseInt(process.env.AUTO_DP_INTERVAL_MS || "60000", 10);
     await msg.reply(`✅ AutoDP started.\nUpdating every ${intervalMs / 1000}s`);
 
     // Calculate IST-based delay to next interval start
     const now = new Date().toLocaleString("en-IN", {
-      timeZone: "Asia/Kolkata",
+      timeZone: TIME_ZONE,
     });
     const date = new Date(now);
     const seconds = date.getSeconds();

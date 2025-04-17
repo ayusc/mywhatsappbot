@@ -48,7 +48,9 @@ export default {
           fs.readFileSync(OUTPUT_FILE).toString("base64"),
           "output.txt",
         );
-        await msg.reply(media, {
+        const chat = await msg.getChat();
+
+        await client.sendMessage(chat.id._serialized, media, {
           caption: "✅ Output too long. Sent as file.",
         });
         fs.unlinkSync(OUTPUT_FILE);

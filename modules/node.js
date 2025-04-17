@@ -79,7 +79,10 @@ export default {
           fs.readFileSync(OUTPUT_FILE).toString("base64"),
           "output.txt",
         );
-        await client.sendMessage(msg.from, media, {
+        
+        const chat = await msg.getChat();
+
+        await client.sendMessage(chat.id._serialized, media, {
           caption: "✅ Output too long. Sent as file.",
           quotedMessage: msg,
         });

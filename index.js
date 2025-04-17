@@ -74,6 +74,11 @@ client.on('ready', async () => {
 
     const autoDP = process.env.ALWAYS_AUTO_DP;
     const autobio = process.env.ALWAYS_AUTO_BIO;
+    const SHOW_HOROSCOPE = process.env.SHOW_HOROSCOPE;
+
+    if (SHOW_HOROSCOPE && SHOW_HOROSCOPE !== 'False') {
+      throw new Error('⚠️ SHOW_HOROSCOPE must be "True" or "False" (as string). Received:', autoDP);
+    }
     
     if (autoDP === 'True') {
       if (commands.has('.autodp')) {
@@ -92,7 +97,7 @@ client.on('ready', async () => {
         console.warn('⚠️ .autodp command not found');
       }
     } else if (autoDP && autoDP !== 'False') {
-      console.warn('⚠️ ALWAYS_AUTO_DP must be "True" or "False" (as string). Received:', autoDP);
+      throw new Error('⚠️ ALWAYS_AUTO_DP must be "True" or "False" (as string). Received:', autoDP);
     }
     if (autobio === 'True') {
       if (commands.has('.autobio')) {
@@ -111,7 +116,7 @@ client.on('ready', async () => {
         console.warn('⚠️ .autobio command not found');
       }
     } else if (autobio && autobio !== 'False') {
-      console.warn('⚠️ ALWAYS_AUTO_BIO must be "True" or "False" (as string). Received:', autoDP);
+      throw new Error('⚠️ ALWAYS_AUTO_BIO must be "True" or "False" (as string). Received:', autoDP);
     }
   }
 });
