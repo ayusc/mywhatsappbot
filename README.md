@@ -1,10 +1,15 @@
-# WhatsApp Userbot
+# WhatsApp Bot
+
+> [!NOTE]
+> This repository is currently WIP (Work In Progress)<br>
+> Some features might be unstable<br>
+> Report bugs at earliest !
 
 A simple WhatsApp userbot using `whatsapp-web.js` with persistent session via MongoDB designed to run with Github Actions.
 
 [![CodeFactor](https://www.codefactor.io/repository/github/ayusc/whatsappbot/badge)](https://www.codefactor.io/repository/github/ayusc/whatsappbot)
 
-> [!IMPORTANT]
+> [!WARNING]
 > **It is not guaranteed you will not be blocked by using this bot. WhatsApp does not allow bots or unofficial clients on their platform, so this shouldn't be considered totally safe.<br>Use it at your own risk !!!**
 
 # How to Deploy ?
