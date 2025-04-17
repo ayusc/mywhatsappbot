@@ -46,7 +46,10 @@ export default {
     if (startIndex === -1)
       return message.reply('Could not find the message sequence.');
 
-    const slice = allMsgs.slice(startIndex, startIndex + count);
+    const slice = allMsgs
+    .slice(startIndex)
+    .filter(m => m.type === 'chat' && m.body)
+    .slice(0, count);
 
     const messages = await Promise.all(
       slice.map(async (m, i) => {
