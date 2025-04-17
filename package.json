@@ -29,6 +29,10 @@
     "space": 2,
     "rules": {
       "arrow-parens": "off"
+    },
+    "parserOptions": {
+      "ecmaVersion": 2022,
+      "sourceType": "module"
     }
   },
   "prettier": {
