@@ -6,7 +6,7 @@ A simple WhatsApp userbot using `whatsapp-web.js` with persistent session via Mo
 
 # How to Deploy ?
 
-First of all you need the MONGO_URI environment variable which is crutial for running the bot and storing the session remotely. Please follow the steps to create your MongoDB URI string:
+First of all you need the MONGO_URI and GITTOKEN environment variables which is crutial for running the bot and storing the session remotely. Please follow the steps to create your MongoDB URI string:
 
 1. Go to https://www.mongodb.com/cloud/atlas
 2. Complete the sign-up/login process.
@@ -21,6 +21,14 @@ First of all you need the MONGO_URI environment variable which is crutial for ru
 11. Click “Allow Access
 12. It will fill in: 0.0.0.0/0
 13. Click “Confirm”
+
+Next click on your GitHub profile go to Settings > Developer settings > Personal access tokens.
+Select Tokens (classic)
+Then Generate a new token (classic)
+Under select scopes select everything.
+Under expiration set it to No expiration
+You will be provided the github personal access token (copy and paste it somewhere) 
+You need to set it as your GITTOKEN on next step.
 
 ## Setting the environment variables 
 
