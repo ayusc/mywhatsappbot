@@ -28,7 +28,7 @@ export default {
       );
     }
 
-    reply = await message.reply(
+    const reply = await message.reply(
       `🔍 Processing image using language \`${lang}\`...`
     );
 
