@@ -78,7 +78,7 @@ client.on('ready', async () => {
     const autobio = process.env.ALWAYS_AUTO_BIO || 'False';
     const SHOW_HOROSCOPE = process.env.SHOW_HOROSCOPE || 'False';
 
-    if (SHOW_HOROSCOPE && SHOW_HOROSCOPE !== 'False') {
+    if (SHOW_HOROSCOPE !== 'True' && SHOW_HOROSCOPE !== 'False') {
       throw new Error(
         '⚠️ SHOW_HOROSCOPE must be "True" or "False" (as string). Received:',
         autoDP
