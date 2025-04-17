@@ -3,7 +3,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "lint": "xo",
+    "format": "xo --fix"
   },
   "dependencies": {
     "axios": "^1.6.0",
@@ -19,7 +21,19 @@
     "node-fetch": "^3.3.2",
     "canvas": "^2.11.2",
     "sharp": "^0.33.4",
-    "weather-js": "latest"
+    "weather-js": "^2.0.0"
+  },
+  "devDependencies": {
+    "eslint": "latest",
+    "prettier": "latest",
+    "xo": "latest"
+  },
+  "xo": {
+    "prettier": true,
+    "semicolon": false,
+    "space": 2,
+    "rules": {
+      "arrow-parens": "off"
+    }
   }
 }
-
