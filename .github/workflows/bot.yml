@@ -25,4 +25,11 @@ jobs:
           GITTOKEN: ${{ secrets.GITTOKEN }} 
           ALWAYS_AUTO_DP: ${{ secrets.ALWAYS_AUTO_DP }} 
           ALWAYS_AUTO_BIO: ${{ secrets.ALWAYS_AUTO_BIO }} 
+          SHOW_HOROSCOPE: ${{ secrets.SHOW_HOROSCOPE }} 
+          ZODIAC_SIGN: ${{ secrets.ZODIAC_SIGN }} 
+          CITY: ${{ secrets.CITY }} 
+          IMAGE_URL: ${{ secrets.IMAGE_URL }} 
+          AUTO_DP_INTERVAL_MS: ${{ secrets.AUTO_DP_INTERVAL_MS }} 
+          TIME_ZONE: ${{ secrets.TIME_ZONE }} 
+          AUTO_BIO_INTERVAL_MS: ${{ secrets.AUTO_BIO_INTERVAL_MS }} 
         run: npm start
