@@ -6,7 +6,7 @@ import path from "path";
 import https from "https";
 import { fileURLToPath } from "url";
 import weather from "weather-js";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
 import pkg from "whatsapp-web.js";
 const { Client, LocalAuth, MessageMedia, Poll, GroupChat } = pkg;
@@ -18,9 +18,11 @@ dotenv.config();
 const city = process.env.CITY || "Kolkata";
 const ZODIAC_SIGN = process.env.ZODIAC_SIGN || "Gemini";
 const TIME_ZONE = process.env.TIME_ZONE || "Asia/Kolkata";
-const imageUrl = process.env.IMAGE_URL || "https://i.ibb.co/d4qcHwdj/blank-profile-picture-973460-1280.png";
+const imageUrl =
+  process.env.IMAGE_URL ||
+  "https://i.ibb.co/d4qcHwdj/blank-profile-picture-973460-1280.png";
 const intervalMs = parseInt(process.env.AUTO_DP_INTERVAL_MS || "60000", 10);
-const SHOW_HOROSCOPE = process.env.SHOW_HOROSCOPE || "False"
+const SHOW_HOROSCOPE = process.env.SHOW_HOROSCOPE || "False";
 
 export let autodpInterval = null;
 const fontPath = path.join(__dirname, "Lobster-Regular.ttf");

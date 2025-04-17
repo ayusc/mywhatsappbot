@@ -79,7 +79,7 @@ export default {
           fs.readFileSync(OUTPUT_FILE).toString("base64"),
           "output.txt",
         );
-        
+
         const chat = await msg.getChat();
 
         await client.sendMessage(chat.id._serialized, media, {
