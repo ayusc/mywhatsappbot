@@ -2,6 +2,9 @@
   "name": "whatsapp-bot",
   "main": "index.js",
   "type": "module",
+  "scripts": {
+    "start": "node index.js",
+  },
   "dependencies": {
     "axios": "^1.6.0",
     "puppeteer": "latest",
