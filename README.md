@@ -29,22 +29,25 @@ First of all fork the repository and then go to repository settings > Security >
 
 Here's a list of the environment variables that needs to be set:
 
-MONGO_URI: Required
-GITTOKEN: Required
-ALWAYS_AUTO_DP: Required
-ALWAYS_AUTO_BIO: Required
-SHOW_HOROSCOPE: Optional
-ZODIAC_SIGN: Optional
-CITY: Optional
-IMAGE_URL: Optional
-AUTO_DP_INTERVAL_MS: Optional
-TIME_ZONE: Optional
-AUTO_BIO_INTERVAL_MS: Optional
+• MONGO_URI: Required<br>
+• GITTOKEN: Required<br>
+• ALWAYS_AUTO_DP: Required<br>
+• ALWAYS_AUTO_BIO: Required<br>
+• SHOW_HOROSCOPE: Optional<br>
+• ZODIAC_SIGN: Optional<br>
+• CITY: Optional<br>
+• IMAGE_URL: Optional<br>
+• AUTO_DP_INTERVAL_MS: Optional<br>
+• TIME_ZONE: Optional<br>
+• AUTO_BIO_INTERVAL_MS: Optional
 
 ## Deploying
 After you have done all the above steps go to your Github Actions, then select the "Whatsapp Bot" workflow and run it.
 At the Run Bot step you will be provided a QR for first time login. You need to scan the QR code with your mobile device. Please zoom out your page to 50% to properly scan the QR.
 After logged in the userbot is ready to use and the session is successfully saved to your MongoDB Cluster.
+
+### Note
+The Github Action workflow cannot run endlessly (it can run for maximum 6 hours) so the userbot will Cancel the workflow automatically after 5 hours and dispatch a new one immediately. So the bot will be down for some time. It usually takes 4-5 mins for the bot to be back again.
 
 # Trobleshooting
 
