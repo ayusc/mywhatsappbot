@@ -4,8 +4,7 @@ A simple WhatsApp userbot using `whatsapp-web.js` with persistent session via Mo
 
 [![CodeFactor](https://www.codefactor.io/repository/github/ayusc/whatsappbot/badge)](https://www.codefactor.io/repository/github/ayusc/whatsappbot)
 
-> [!IMPORTANT]
-> **It is not guaranteed you will not be blocked by using this bot. WhatsApp does not allow bots or unofficial clients on their platform, so this shouldn't be considered totally safe.<br>Use it at your own risk !!!**
+> [!IMPORTANT] > **It is not guaranteed you will not be blocked by using this bot. WhatsApp does not allow bots or unofficial clients on their platform, so this shouldn't be considered totally safe.<br>Use it at your own risk !!!**
 
 # How to Deploy ?
 
@@ -33,33 +32,35 @@ Under expiration set it to No expiration.
 You will be provided the github personal access token (copy and paste it somewhere).
 You need to set it as your GITTOKEN on next step.
 
-## Setting the environment variables 
+## Setting the environment variables
 
 Next step is setting the environment variables on which most of the userbot commands relies on.
 First of all fork the repository and then go to repository settings > Security > Secrets and Variables > Action and add new repository secret.
 
 Here's a list of the environment variables that needs to be set:
 
-| Field                | Type    | Description                                                                 | Mandatory |
-|----------------------|---------|-----------------------------------------------------------------------------|-----------|
-| `MONGO_URI`          | String  | Required for storing the RemoteAuth session. Without this, the bot won't run. | Yes       |
-| `GITTOKEN`           | String  | Required for cancelling and dispatching GitHub workflows.                   | Yes       |
-| `ALWAYS_AUTO_DP`     | Boolean | Whether the user wants the AutoDP feature to start on boot.                 | No        |
-| `ALWAYS_AUTO_BIO`    | Boolean | Whether the user wants the AutoBio feature to start on boot.                | No        |
-| `SHOW_HOROSCOPE`     | Boolean | Whether to show the current horoscope on the user's profile picture.        | No        |
-| `ZODIAC_SIGN`        | String  | The zodiac sign or sunsign of the user (required if using `SHOW_HOROSCOPE`).| No        |
-| `CITY`               | String  | The city where the user resides (required for AutoDP).                      | No        |
-| `IMAGE_URL`          | String  | The URL containing the user's profile picture (required for AutoDP).        | No        |
-| `TIME_ZONE`          | String  | The time zone where the user resides (e.g., `Asia/Kolkata`).                | No        |
-| `AUTO_DP_INTERVAL_MS`| Integer | How often the user's DP should be updated (in milliseconds).                | No        |
-| `AUTO_BIO_INTERVAL_MS`| Integer| How often the user's bio should be updated (in milliseconds).               | No        |
+| Field                  | Type    | Description                                                                   | Mandatory |
+| ---------------------- | ------- | ----------------------------------------------------------------------------- | --------- |
+| `MONGO_URI`            | String  | Required for storing the RemoteAuth session. Without this, the bot won't run. | Yes       |
+| `GITTOKEN`             | String  | Required for cancelling and dispatching GitHub workflows.                     | Yes       |
+| `ALWAYS_AUTO_DP`       | Boolean | Whether the user wants the AutoDP feature to start on boot.                   | No        |
+| `ALWAYS_AUTO_BIO`      | Boolean | Whether the user wants the AutoBio feature to start on boot.                  | No        |
+| `SHOW_HOROSCOPE`       | Boolean | Whether to show the current horoscope on the user's profile picture.          | No        |
+| `ZODIAC_SIGN`          | String  | The zodiac sign or sunsign of the user (required if using `SHOW_HOROSCOPE`).  | No        |
+| `CITY`                 | String  | The city where the user resides (required for AutoDP).                        | No        |
+| `IMAGE_URL`            | String  | The URL containing the user's profile picture (required for AutoDP).          | No        |
+| `TIME_ZONE`            | String  | The time zone where the user resides (e.g., `Asia/Kolkata`).                  | No        |
+| `AUTO_DP_INTERVAL_MS`  | Integer | How often the user's DP should be updated (in milliseconds).                  | No        |
+| `AUTO_BIO_INTERVAL_MS` | Integer | How often the user's bio should be updated (in milliseconds).                 | No        |
 
 ## Deploying
+
 After you have done all the above steps go to your Github Actions, then select the "Whatsapp Bot" workflow and run it.
 At the Run Bot step you will be provided a QR for first time login. You need to scan the QR code with your mobile device. Please zoom out your page to 50% to properly scan the QR.
 After logged in the userbot is ready to use and the session is successfully saved to your MongoDB Cluster.
 
 ### Note
+
 The Github Action workflow cannot run endlessly (it can run for maximum 6 hours) so the userbot will Cancel the workflow automatically after 5 hours and dispatch a new one immediately. So the bot will be down for some time. It usually takes 4-5 mins for the bot to be back again.
 
 # Trobleshooting

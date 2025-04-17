@@ -1,4 +1,4 @@
-import {interval} from './autobio.js'
+import { interval } from './autobio.js';
 
 export default {
   name: '.stopbio',
@@ -6,13 +6,13 @@ export default {
 
   async execute(message) {
     if (interval) {
-      clearInterval(interval)
-      globalThis.interval = null
-      await message.reply('🛑 AutoBio stopped.')
-      await message.delete(true, true)
+      clearInterval(interval);
+      globalThis.interval = null;
+      await message.reply('🛑 AutoBio stopped.');
+      await message.delete(true, true);
     } else {
-      await message.reply('ℹ️ AutoBio is not running.')
-      await message.delete(true, true)
+      await message.reply('ℹ️ AutoBio is not running.');
+      await message.delete(true, true);
     }
   },
-}
+};
