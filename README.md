@@ -5,7 +5,7 @@ A simple WhatsApp userbot using `whatsapp-web.js` with persistent session via Mo
 [![CodeFactor](https://www.codefactor.io/repository/github/ayusc/whatsappbot/badge)](https://www.codefactor.io/repository/github/ayusc/whatsappbot)
 
 > [!IMPORTANT]
-> **It is not guaranteed you will not be blocked by using this method. WhatsApp does not allow bots or unofficial clients on their platform, so this shouldn't be considered totally safe.**
+> **It is not guaranteed you will not be blocked by using this bot. WhatsApp does not allow bots or unofficial clients on their platform, so this shouldn't be considered totally safe.<br>Use it at your own risk !!!**
 
 # How to Deploy ?
 
@@ -40,17 +40,19 @@ First of all fork the repository and then go to repository settings > Security >
 
 Here's a list of the environment variables that needs to be set:
 
-• MONGO_URI: Required<br>
-• GITTOKEN: Required<br>
-• ALWAYS_AUTO_DP: Optional<br>
-• ALWAYS_AUTO_BIO: Optional<br>
-• SHOW_HOROSCOPE: Optional<br>
-• ZODIAC_SIGN: Optional<br>
-• CITY: Optional<br>
-• IMAGE_URL: Optional<br>
-• AUTO_DP_INTERVAL_MS: Optional<br>
-• TIME_ZONE: Optional<br>
-• AUTO_BIO_INTERVAL_MS: Optional
+| Field                | Type    | Description                                                                 | Mandatory |
+|----------------------|---------|-----------------------------------------------------------------------------|-----------|
+| `MONGO_URI`          | String  | Required for storing the RemoteAuth session. Without this, the bot won't run. | Yes       |
+| `GITTOKEN`           | String  | Required for cancelling and dispatching GitHub workflows.                   | Yes       |
+| `ALWAYS_AUTO_DP`     | Boolean | Whether the user wants the AutoDP feature to start on boot.                 | No        |
+| `ALWAYS_AUTO_BIO`    | Boolean | Whether the user wants the AutoBio feature to start on boot.                | No        |
+| `SHOW_HOROSCOPE`     | Boolean | Whether to show the current horoscope on the user's profile picture.        | No        |
+| `ZODIAC_SIGN`        | String  | The zodiac sign or sunsign of the user (required if using `SHOW_HOROSCOPE`).| No        |
+| `CITY`               | String  | The city where the user resides (required for AutoDP).                      | No        |
+| `IMAGE_URL`          | String  | The URL containing the user's profile picture (required for AutoDP).        | No        |
+| `TIME_ZONE`          | String  | The time zone where the user resides (e.g., `Asia/Kolkata`).                | No        |
+| `AUTO_DP_INTERVAL_MS`| Integer | How often the user's DP should be updated (in milliseconds).                | No        |
+| `AUTO_BIO_INTERVAL_MS`| Integer| How often the user's bio should be updated (in milliseconds).               | No        |
 
 ## Deploying
 After you have done all the above steps go to your Github Actions, then select the "Whatsapp Bot" workflow and run it.
