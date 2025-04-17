@@ -31,8 +31,8 @@ Here's a list of the environment variables that needs to be set:
 
 • MONGO_URI: Required<br>
 • GITTOKEN: Required<br>
-• ALWAYS_AUTO_DP: Required<br>
-• ALWAYS_AUTO_BIO: Required<br>
+• ALWAYS_AUTO_DP: Optional<br>
+• ALWAYS_AUTO_BIO: Optional<br>
 • SHOW_HOROSCOPE: Optional<br>
 • ZODIAC_SIGN: Optional<br>
 • CITY: Optional<br>
