@@ -1,16 +1,16 @@
-import { autodpInterval } from "./autodp.js";
+import {autodpInterval} from './autodp.js'
 
 export default {
-  name: ".stopdp",
-  description: "Stops the AutoDP interval",
+  name: '.stopdp',
+  description: 'Stops the AutoDP interval',
 
-  async execute(msg) {
+  async execute(message) {
     if (autodpInterval) {
-      clearInterval(autodpInterval);
-      global.autodpInterval = null;
-      await msg.reply("🛑 AutoDP stopped.");
+      clearInterval(autodpInterval)
+      globalThis.autodpInterval = null
+      await message.reply('🛑 AutoDP stopped.')
     } else {
-      await msg.reply("ℹ️ AutoDP is not running.");
+      await message.reply('ℹ️ AutoDP is not running.')
     }
   },
-};
+}

@@ -1,18 +1,18 @@
-import { interval } from "./autobio.js";
+import {interval} from './autobio.js'
 
 export default {
-  name: ".stopbio",
+  name: '.stopbio',
   description: 'Stop updating WhatsApp "About" automatically.',
 
-  async execute(msg) {
+  async execute(message) {
     if (interval) {
-      clearInterval(interval);
-      global.interval = null;
-      await msg.reply("🛑 AutoBio stopped.");
-      await msg.delete(true, true);
+      clearInterval(interval)
+      globalThis.interval = null
+      await message.reply('🛑 AutoBio stopped.')
+      await message.delete(true, true)
     } else {
-      await msg.reply("ℹ️ AutoBio is not running.");
-      await msg.delete(true, true);
+      await message.reply('ℹ️ AutoBio is not running.')
+      await message.delete(true, true)
     }
   },
-};
+}
