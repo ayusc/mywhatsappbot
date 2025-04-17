@@ -3,7 +3,8 @@
 > [!NOTE]
 > This repository is currently WIP (Work In Progress)<br>
 > Some features might be unstable<br>
-> Report bugs at earliest !
+> Report bugs at earliest !<br>
+>> For unlimited workflow builds please keep your repository source open (thereby complying with the LICENSE) for reference click [here](https://github.com/orgs/community/discussions/26054)
 
 A simple WhatsApp userbot using `whatsapp-web.js` with persistent session via MongoDB designed to run with Github Actions.
 
