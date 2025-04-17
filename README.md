@@ -16,18 +16,18 @@ First of all you need the MONGO_URI and GITTOKEN environment variables which is 
 6. Then create the database user
 7. Then under choose a connection method select Drivers. Select NodeJS (if not already selected)
 8. You will get the MONGO_URI below just put your password you created earlier in place of <db_password>
-9. Go to “Network Access”
+9. In Dashboard Go to “Network Access”
 10. Click “Add IP Address”
 11. Click “Allow Access
 12. It will fill in: 0.0.0.0/0
 13. Click “Confirm”
 
-Next click on your GitHub profile go to Settings > Developer settings > Personal access tokens.
-Select Tokens (classic)
-Then Generate a new token (classic)
+Next click on your GitHub profile picture go to Settings > Developer settings > Personal access tokens.
+Select Tokens (classic).
+Then Generate a new token (classic).
 Under select scopes select everything.
-Under expiration set it to No expiration
-You will be provided the github personal access token (copy and paste it somewhere) 
+Under expiration set it to No expiration.
+You will be provided the github personal access token (copy and paste it somewhere).
 You need to set it as your GITTOKEN on next step.
 
 ## Setting the environment variables 
