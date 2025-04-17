@@ -21,7 +21,7 @@ const TIME_ZONE = process.env.TIME_ZONE || 'Asia/Kolkata';
 const imageUrl =
   process.env.IMAGE_URL ||
   'https://i.ibb.co/d4qcHwdj/blank-profile-picture-973460-1280.png';
-const intervalMs = process.env.AUTO_DP_INTERVAL_MS || '60000';
+const intervalMs = parseInt(process.env.AUTO_DP_INTERVAL_MS, 10) || 60000;
 const SHOW_HOROSCOPE = process.env.SHOW_HOROSCOPE || 'False';
 
 export let autodpInterval = null;
