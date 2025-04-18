@@ -30,6 +30,7 @@ if (!OCR_SPACE_API_KEY) {
 export default {
   name: '.ocr',
   description: 'Extracts text from an image using OCR',
+  usage: '.ocr <lang> in reply to a image.\nIf no language is provided defaults to english or eng.'
 
   async execute(message, arguments_, client) {
     if (!message.hasQuotedMsg) {
