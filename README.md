@@ -1,16 +1,15 @@
-# WhatsApp Bot
+# WahBuddy
+A simple WhatsApp userbot using `whatsapp-web.js` with persistent session via MongoDB designed to run with Github Actions.
 
 > [!WARNING]
 > **It is not guaranteed you will not be blocked by using this bot. WhatsApp does not allow bots or unofficial clients on their platform, so this shouldn't be considered totally safe.<br>Use it at your own risk !!!**
 
-> [!NOTE]
-> For unlimited workflow builds please keep your repository source open (thereby complying with the LICENSE) for reference click [here](https://github.com/orgs/community/discussions/26054)
-
-A simple WhatsApp userbot using `whatsapp-web.js` with persistent session via MongoDB designed to run with Github Actions.
-
 [![CodeFactor](https://www.codefactor.io/repository/github/ayusc/whatsappbot/badge)](https://www.codefactor.io/repository/github/ayusc/whatsappbot)
 
 # How to Deploy ?
+
+> [!NOTE]
+> For unlimited workflow builds please keep your repository source open (thereby complying with the LICENSE) for reference click [here](https://github.com/orgs/community/discussions/26054)
 
 First of all you need the MONGO_URI and GITTOKEN environment variables which is crutial for running the bot and storing the session remotely. Please follow the steps to create your MongoDB URI string:
 
