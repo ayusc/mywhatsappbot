@@ -56,7 +56,7 @@ Here's a list of the environment variables that needs to be set:
 | `TIME_ZONE`            | String  | The time zone where the user resides (e.g., `Asia/Kolkata`).                  | No        |
 | `AUTO_DP_INTERVAL_MS`  | Integer | How often the user's DP should be updated (in milliseconds).                  | No        |
 | `AUTO_BIO_INTERVAL_MS` | Integer | How often the user's bio should be updated (in milliseconds).                 | No        |
-| `OCR_SPACE_API_KEY`    | string  | Required for the .ocr command. Obtain it from ocr.space                       | Yes       |
+| `OCR_SPACE_API_KEY`    | String  | Required for the .ocr command. Obtain it from https://ocr.space               | Yes       |
 
 ## Deploying
 
