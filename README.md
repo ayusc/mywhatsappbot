@@ -1,17 +1,14 @@
 # WhatsApp Bot
 
+> [!WARNING]
+> **It is not guaranteed you will not be blocked by using this bot. WhatsApp does not allow bots or unofficial clients on their platform, so this shouldn't be considered totally safe.<br>Use it at your own risk !!!**
+
 > [!NOTE]
-> This repository is currently WIP (Work In Progress)<br>
-> Some features might be unstable<br>
-> Report bugs at earliest !<br>
->> For unlimited workflow builds please keep your repository source open (thereby complying with the LICENSE) for reference click [here](https://github.com/orgs/community/discussions/26054)
+> For unlimited workflow builds please keep your repository source open (thereby complying with the LICENSE) for reference click [here](https://github.com/orgs/community/discussions/26054)
 
 A simple WhatsApp userbot using `whatsapp-web.js` with persistent session via MongoDB designed to run with Github Actions.
 
 [![CodeFactor](https://www.codefactor.io/repository/github/ayusc/whatsappbot/badge)](https://www.codefactor.io/repository/github/ayusc/whatsappbot)
-
-> [!WARNING]
-> **It is not guaranteed you will not be blocked by using this bot. WhatsApp does not allow bots or unofficial clients on their platform, so this shouldn't be considered totally safe.<br>Use it at your own risk !!!**
 
 # How to Deploy ?
 
@@ -59,6 +56,7 @@ Here's a list of the environment variables that needs to be set:
 | `TIME_ZONE`            | String  | The time zone where the user resides (e.g., `Asia/Kolkata`).                  | No        |
 | `AUTO_DP_INTERVAL_MS`  | Integer | How often the user's DP should be updated (in milliseconds).                  | No        |
 | `AUTO_BIO_INTERVAL_MS` | Integer | How often the user's bio should be updated (in milliseconds).                 | No        |
+| `OCR_SPACE_API_KEY`    | string  | Required for the .ocr command. Obtain it from ocr.space                         | No        |
 
 ## Deploying
 
