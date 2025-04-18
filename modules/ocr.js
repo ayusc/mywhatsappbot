@@ -16,6 +16,8 @@
 
 
 import fetch from 'node-fetch';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const OCR_SPACE_API_KEY = process.env.OCR_SPACE_API_KEY;
 
