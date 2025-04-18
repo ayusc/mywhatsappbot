@@ -19,11 +19,9 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Bootstrap only once at load
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load all command modules once at boot
 const commands = [];
 const commandFiles = fs.readdirSync(__dirname).filter(file =>
   file.endsWith('.js') && file !== 'help.js'
@@ -37,7 +35,6 @@ for (const file of commandFiles) {
   }
 }
 
-// Export the help command
 export default {
   name: '.help',
   description: 'Lists all commands or shows usage for a specific command',
@@ -54,14 +51,16 @@ export default {
       }
 
       const usage = command.usage || command.description;
-      return await message.reply(`*Usage for ${command.name}:*\n${usage}`);
+      return await message.reply(`*Usage for ${command.name}:*\n\n${usage}`);
     }
 
-    // Show all commands
-    let replyMsg = `*Welcome to WahBuddy - A userbot for whatsapp written in pure javascript*\n\nHere are all the bot commands:\nTo know command usage please type \.help {command}\\n\n`;
+    // Generate help list
+    let replyMsg = `*Welcome to WahBuddy - A userbot for WhatsApp written in pure JavaScript*\n\n` +
+                   `Here are all the bot commands:\n` +
+                   `To know command usage please type \`.help {command}\`\n\n`;
 
     for (const cmd of commands) {
-      replyMsg += `${cmd.name}: ${cmd.description}\n`;
+      replyMsg += `\`${cmd.name}\`: ${cmd.description}\n\n`;
     }
 
     await message.reply(replyMsg.trim());
