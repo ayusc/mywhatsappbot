@@ -1,4 +1,4 @@
-//  whatsappbot - A simple whatsapp userbot written in pure js
+//  Whatsappbot - A simple whatsapp userbot written in pure js
 //  Copyright (C) 2025-present Ayus Chatterjee
 //
 //  This program is free software: you can redistribute it and/or modify
@@ -14,10 +14,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import {dispatchWorkflow, cancelWorkflowRun} from '../newaction.js'
 
-import { dispatchWorkflow, cancelWorkflowRun } from '../newaction.js';
-
-const CURRENT_RUN_ID = process.env.GITHUB_RUN_ID;
+const CURRENT_RUN_ID = process.env.GITHUB_RUN_ID
 
 export default {
   name: '.restart',
@@ -25,17 +24,17 @@ export default {
     'Restarts the GitHub Actions workflow by dispatching a new one and canceling the current run',
 
   async execute(message, arguments_, client) {
-    await message.reply('♻️ Restarting the bot...');
+    await message.reply('♻️ Restarting the bot...')
 
     try {
-      await dispatchWorkflow();
-      await cancelWorkflowRun(CURRENT_RUN_ID);
+      await dispatchWorkflow()
+      await cancelWorkflowRun(CURRENT_RUN_ID)
     } catch (error) {
-      console.error('❌ Error during restart:', error);
+      console.error('❌ Error during restart:', error)
       await message.reply(
         '❌ Failed to restart workflow: ' +
           (error?.response?.data?.message || error.message)
-      );
+      )
     }
   },
-};
+}

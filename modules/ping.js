@@ -1,4 +1,4 @@
-//  whatsappbot - A simple whatsapp userbot written in pure js
+//  Whatsappbot - A simple whatsapp userbot written in pure js
 //  Copyright (C) 2025-present Ayus Chatterjee
 //
 //  This program is free software: you can redistribute it and/or modify
@@ -14,23 +14,22 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
 export default {
   name: '.ping',
   description: 'Replies with Pong and response time',
 
   async execute(message, arguments_, client) {
-    const start = Date.now();
+    const start = Date.now()
 
-    const sentMessage = await message.reply('*Pong !*');
+    const sentMessage = await message.reply('*Pong !*')
 
-    const end = Date.now();
+    const end = Date.now()
 
-    const timeTaken = ((end - start) / 1000).toFixed(3);
+    const timeTaken = ((end - start) / 1000).toFixed(3)
 
     // Wait for msg to register
-    await new Promise(r => setTimeout(r, 3000));
+    await new Promise(r => setTimeout(r, 3000))
 
-    await sentMessage.edit(`*Pong !*\nResponse time: ${timeTaken}s`);
+    await sentMessage.edit(`*Pong !*\nResponse time: ${timeTaken}s`)
   },
-};
+}
