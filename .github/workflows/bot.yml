@@ -32,4 +32,5 @@ jobs:
           AUTO_DP_INTERVAL_MS: ${{ secrets.AUTO_DP_INTERVAL_MS }} 
           TIME_ZONE: ${{ secrets.TIME_ZONE }} 
           AUTO_BIO_INTERVAL_MS: ${{ secrets.AUTO_BIO_INTERVAL_MS }} 
+          OCR_SPACE_API_KEY: ${{ secrets.OCR_SPACE_API_KEY }}
         run: npm start
