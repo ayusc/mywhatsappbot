@@ -14,7 +14,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import {autodpInterval} from './autodp.js'
+import { autodpInterval } from './autodp.js';
 
 export default {
   name: '.stopdp',
@@ -22,11 +22,11 @@ export default {
 
   async execute(message) {
     if (autodpInterval) {
-      clearInterval(autodpInterval)
-      globalThis.autodpInterval = null
-      await message.reply('🛑 AutoDP stopped.')
+      clearInterval(autodpInterval);
+      globalThis.autodpInterval = null;
+      await message.reply('🛑 AutoDP stopped.');
     } else {
-      await message.reply('ℹ️ AutoDP is not running.')
+      await message.reply('ℹ️ AutoDP is not running.');
     }
   },
-}
+};
