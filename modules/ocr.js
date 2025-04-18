@@ -76,12 +76,20 @@ export default {
 
       const result = await response.json();
 
-      if (!result.IsErroredOnProcessing && result.ParsedResults?.[0]?.ParsedText) {
-        const cleanText = result.ParsedResults[0].ParsedText.trim();
-        await reply.edit(`📃 OCR Result:\n\n${cleanText}`);
-      } else {
-        await reply.edit('❌ No readable text found in the image or OCR failed.');
+      if (result.IsErroredOnProcessing) {
+      const message = result.ErrorMessage?.[0] || 'Unknown OCR processing error.';
+      await reply.edit(`❌ Error while performing OCR: ${message}`);
+      return;
       }
+
+      const parsedText = result.ParsedResults?.[0]?.ParsedText?.trim();
+
+      if (!parsedText) {
+        await reply.edit('❌ No readable text found in the image.');
+      } else {
+        await reply.edit(`📃 OCR Result:\n\n${parsedText}`);
+      }
+
     } catch (error) {
       console.error('OCR error:', error);
       await reply.edit(
