@@ -15,7 +15,15 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import { createWorker } from 'tesseract.js';
+import fetch from 'node-fetch';
+
+const OCR_SPACE_API_KEY = process.env.OCR_SPACE_API_KEY;
+
+if (!OCR_SPACE_API_KEY) {
+      throw new Error(
+        'Your OCR_SPACE_API_KEY is not set. Please set it first.',
+      );
+    }
 
 export default {
   name: '.ocr',
@@ -50,23 +58,32 @@ export default {
     );
 
     try {
-      const worker = await createWorker(lang);
-      const buffer = Buffer.from(media.data, 'base64');
+      const imageBuffer = Buffer.from(media.data, 'base64');
 
-      const {
-        data: { text },
-      } = await worker.recognize(buffer);
+      const formData = new FormData();
+      formData.append('apikey', OCR_SPACE_API_KEY); 
+      formData.append('language', lang);
+      formData.append('OCREngine', '2');
+      formData.append('isOverlayRequired', 'false');
+      formData.append('file', new Blob([imageBuffer], { type: media.mimetype }), 'image.png');
 
-      await worker.terminate();
+      const response = await fetch('https://api.ocr.space/parse/image', {
+        method: 'POST',
+        body: formData,
+      });
 
-      const cleanText =
-        text.trim() || '❌ No readable text found in the image.';
+      const result = await response.json();
 
-      await reply.edit(`📃 OCR Result:\n\n${cleanText}`);
+      if (!result.IsErroredOnProcessing && result.ParsedResults?.[0]?.ParsedText) {
+        const cleanText = result.ParsedResults[0].ParsedText.trim();
+        await reply.edit(`📃 OCR Result:\n\n${cleanText}`);
+      } else {
+        await reply.edit('❌ No readable text found in the image or OCR failed.');
+      }
     } catch (error) {
       console.error('OCR error:', error);
       await reply.edit(
-        '❌ Error while performing OCR. Make sure the language code is valid.'
+        '❌ Error while performing OCR.\nMake sure the language code is valid and try again.'
       );
     }
   },
