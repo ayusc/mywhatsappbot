@@ -23,8 +23,7 @@
   },
   "devDependencies": {
     "eslint": "latest",
-    "prettier": "latest",
-    "xo": "latest"
+    "prettier": "latest"
   },
   "prettier": {
     "arrowParens": "avoid",
