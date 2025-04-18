@@ -312,32 +312,23 @@ export default {
       `✅ AutoDP started.\nUpdating every ${intervalMs / 1000}s`
     );
 
-    // Calculate IST-based delay to next interval start
-    const now = new Date().toLocaleString('en-IN', {
-      timeZone: TIME_ZONE,
-    });
-    const date = new Date(now);
-    const seconds = date.getSeconds();
-    const millisUntilNextInterval =
-      intervalMs - ((seconds * 1000) % intervalMs);
-
+    const now = Date.now();
+    const millisUntilNextInterval = intervalMs - (now % intervalMs);
+    
     setTimeout(() => {
-      // Start interval
       autodpInterval = setInterval(async () => {
         await generateImage();
         const mediadp = await MessageMedia.fromFilePath(outputImage);
         await client.setProfilePicture(mediadp);
-        // Await fs.unlink(outputImage);
         console.log('✅ DP updated');
       }, intervalMs);
-
+    
       // Do the first update exactly on sync
       generateImage()
         .then(async () => {
           const mediadp = await MessageMedia.fromFilePath(outputImage);
           await client.setProfilePicture(mediadp);
-          // Await fs.unlink(outputImage);
-          console.log('✅ DP updated');
+          console.log('✅ First DP updated');
         })
         .catch(() => {});
     }, millisUntilNextInterval);
