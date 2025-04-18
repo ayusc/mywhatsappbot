@@ -16,9 +16,11 @@
 
 
 import fetch from 'node-fetch';
+import dotenv from 'dotenv';
 
 let interval = null;
 let lastQuote = '';
+dotenv.config();
 
 export const autobioInterval = () => interval;
 
