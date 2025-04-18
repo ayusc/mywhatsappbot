@@ -4,7 +4,7 @@ A simple WhatsApp userbot using `whatsapp-web.js` with persistent session via Mo
 > [!WARNING]
 > **It is not guaranteed you will not be blocked by using this bot. WhatsApp does not allow bots or unofficial clients on their platform, so this shouldn't be considered totally safe.<br>Use it at your own risk !!!**
 
-[![CodeFactor](https://www.codefactor.io/repository/github/ayusc/WahBuddy/badge)](https://www.codefactor.io/repository/github/ayusc/whatsappbot)
+[![CodeFactor](https://www.codefactor.io/repository/github/ayusc/wahbuddy/badge)](https://www.codefactor.io/repository/github/ayusc/wahbuddy)
 
 # How to Deploy ?
 
