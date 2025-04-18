@@ -1,4 +1,4 @@
-//  Whatsappbot - A simple whatsapp userbot written in pure js
+//  WahBuddy - A simple whatsapp userbot written in pure js
 //  Copyright (C) 2025-present Ayus Chatterjee
 //
 //  This program is free software: you can redistribute it and/or modify
