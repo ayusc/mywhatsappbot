@@ -20,7 +20,7 @@
     "canvas": "^2.11.2",
     "sharp": "^0.33.4",
     "weather-js": "^2.0.0",
-    "@vitalets/google-translate-api": "latest",
+    "@vitalets/google-translate-api": "latest"
   },
   "devDependencies": {
     "eslint": "latest",
