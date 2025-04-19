@@ -47,8 +47,12 @@ export default {
       // Not a reply
 
       if (arguments_.length === 0) {
-        return message.reply('❌ Usage: `.tr <language_code> <text>` or reply with `.tr <language_code>`');
-      }
+        if (quoted && quoted.body && quoted.type != 'chat') {
+           return message.reply('❌ Please provide text to translate.');
+        } 
+        else {
+           return message.reply('❌ Usage: `.tr <language_code> <text>` or reply with `.tr <language_code>`');
+        }
 
       if (arguments_[0].length === 2) {
         langCode = arguments_[0];
