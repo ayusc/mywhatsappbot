@@ -15,7 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import translate from 'google-translate-api';
+import { translate } from '@vitalets/google-translate-api';
 
 export default {
   name: '.tr',
