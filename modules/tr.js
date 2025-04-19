@@ -15,56 +15,51 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import { translate } from '@vitalets/google-translate-api';
+import translate from 'google-translate-api';
 
 export default {
   name: '.tr',
   description: 'Translates given text or replied message to the specified language.',
-  usage: 'To translate a text type `.tr <language_code> <text>` or reply with `.tr <language_code>`',
+  usage: 'To translate a text type `.tr <language_code> <text>` or reply with `.tr <language_code>` (if no language_code is given auto detects the replied text and translates to english)',
 
-  async execute(message, arguments_, client) {
-    let langCode = arguments_[0];
-    let textToTranslate = arguments_.slice(1).join(' ');
-
-    // Check if replying to a message
+  async execute(message, arguments_, client) { 
     const repliedMessage = message.reference
       ? await message.channel.messages.fetch(message.reference.messageId)
       : null;
 
-    if (repliedMessage) {
-      if (!repliedMessage.content) {
-        return message.reply('❌ Please reply to some text message.');
-      }
+    let langCode = null;
+    let textToTranslate = null;
 
-      // If only `.tr` or `.tr <lang>` is sent in reply, set translation target accordingly
-      if (!langCode || (langCode && !textToTranslate)) {
-        textToTranslate = repliedMessage.content;
+    if (repliedMessage && repliedMessage.content) {
+      // Replied to a text message
+      textToTranslate = repliedMessage.content;
 
-        // Default to English if no language is specified
-        langCode = langCode || 'en';
-      }
+      // If a language code is provided, use it; otherwise default to English
+      langCode = arguments_[0] || 'en';
+    } else if (repliedMessage && !repliedMessage.content) {
+      return message.reply('❌ Please reply to a text message.');
     } else {
-      // If not replying to a message and no text provided
-      if (!textToTranslate && !langCode) {
-        return message.reply('❌ Usage: `.tr <language_code> <text>` or reply with `.tr <language_code>`');
+      // Not replying — parse from input
+      if (arguments_.length === 0) {
+        return message.reply('❌ Usage: `.tr <language_code> <text>` or reply to a message with `.tr <language_code>`');
       }
 
-      // If only `.tr` is used without reply or text
-      if (!textToTranslate && langCode && langCode.length === 2) {
-        return message.reply('❌ Please provide text to translate or reply to a text message.');
-      }
-
-      // If only `.tr <text>` is used, treat it as auto-detect and translate to English
-      if (!textToTranslate && langCode) {
-        textToTranslate = langCode;
+      if (arguments_.length === 1) {
+        // Only one argument — assume it's the text and translate to English
         langCode = 'en';
+        textToTranslate = arguments_[0];
+      } else {
+        langCode = arguments_[0];
+        textToTranslate = arguments_.slice(1).join(' ');
       }
     }
 
     try {
-      const { text } = await translate(textToTranslate, { to: langCode });
-      return message.reply(`**Translated (${langCode}):**\n\n${text}`);
-    } catch (error) {
+      const result = await translate(textToTranslate, { to: langCode });
+      const detectedLang = result.from.language.iso;
+
+      return message.reply(`*Translated (${langCode}) (from ${detectedLang})*:\n\n${result.text}`);
+    } catch (err) {
       return message.reply('❌ Invalid language code or failed to translate.');
     }
   },
