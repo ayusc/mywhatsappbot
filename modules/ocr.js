@@ -1,4 +1,3 @@
-
 //  WahBuddy - A simple whatsapp userbot written in pure js
 //  Copyright (C) 2025-present Ayus Chatterjee
 //
@@ -96,8 +95,9 @@ export default {
         : reply.edit('❌ No readable text found in the image.'));
     } catch (error) {
       console.error('OCR error:', error);
+      await new Promise(r => setTimeout(r, 3000));
       await reply.edit(
-        '❌ Error while performing OCR.\nMake sure the language code is valid and try again.'
+        '❌ OCR failed to convert the given image to text.'
       );
     }
   },
