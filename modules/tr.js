@@ -65,7 +65,7 @@ export default {
 
     try {
       const result = await translate(textToTranslate, { to: langCode });
-      const fromLang = result.from.language.iso;
+      const fromLang = result.raw.src;
 
       return message.reply(`*Translated from ${fromLang} to ${langCode}:*\n\n${result.text}`);
     } catch (error) {
