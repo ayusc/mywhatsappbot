@@ -19,6 +19,7 @@ import { interval } from './autobio.js';
 export default {
   name: '.stopbio',
   description: 'Stop updating WhatsApp "About" automatically.',
+  usage: 'Type .stopbio in any chat to stop updating WhatsApp About automatically.',
 
   async execute(message) {
     if (interval) {

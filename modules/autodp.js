@@ -290,7 +290,8 @@ Air Quality Index (AQI): ${aqiresult.aqi} (${aqiresult.status})`;
 export default {
   name: '.autodp',
   description:
-    'Automatically update profile pic with clock & temp from a static image',
+    'Start updating WhatsApp Profile Picture with clock, current temperature and horoscope',
+  usage: 'Type .autodp in any chat to start updating WhatsApp Profile Picture with clock, current temperature and horoscope every X seconds',
 
   async execute(message, arguments_, client) {
     if (autodpInterval) {

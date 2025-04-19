@@ -28,7 +28,8 @@ const __dirname = path.dirname(__filename);
 
 export default {
   name: '.carbon',
-  description: 'Generate a code snippet image using Carbon',
+  description: 'Generate a code snippet image using carbon.now.sh',
+  usage:'Type .carbon in reply to a code block to Generate a code snippet image using carbon.now.sh',
 
   async execute(message, arguments_, client) {
     let code = '';

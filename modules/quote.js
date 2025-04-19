@@ -32,6 +32,7 @@ export default {
   name: '.quote',
   description:
     'Creates a quote sticker from a message and the next few (up to 5)',
+  usage: 'Type .quote in reply to a msg to make a sticker out of it.\nType .quote <1-5> in reply to a msg to quote the msg and next few msgs (upto 4)',
 
   async execute(message, arguments_, client) {
     if (!message.hasQuotedMsg) {

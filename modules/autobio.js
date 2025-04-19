@@ -54,7 +54,8 @@ async function runQuoteUpdate() {
 export default {
   name: '.autobio',
   description:
-    'Start updating WhatsApp "About" with motivational quotes every X seconds (default 60s)',
+    'Start updating WhatsApp About with motivational quotes every X seconds',
+  usage: 'Type .autobio in any chat to start updating WhatsApp "About" with motivational quotes every X seconds (default 60s)',
 
   async execute(message, arguments_, client) {
     const AUTO_BIO_INTERVAL = process.env.AUTO_BIO_INTERVAL_MS || 60_000;

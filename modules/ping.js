@@ -17,6 +17,7 @@
 export default {
   name: '.ping',
   description: 'Replies with Pong and response time',
+  usage: 'Type .ping in any chat to check bot status and response time.',
 
   async execute(message, arguments_, client) {
     const start = Date.now();

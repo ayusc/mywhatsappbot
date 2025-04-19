@@ -21,7 +21,8 @@ const CURRENT_RUN_ID = process.env.GITHUB_RUN_ID;
 export default {
   name: '.restart',
   description:
-    'Restarts the GitHub Actions workflow by dispatching a new one and canceling the current run',
+    'Restarts the userbot',
+  usage: 'Type .restart in any chat to restart the userbot.',
 
   async execute(message, arguments_, client) {
     await message.reply('♻️ Restarting the bot...');
