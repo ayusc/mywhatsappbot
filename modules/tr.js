@@ -53,6 +53,7 @@ export default {
         else {
            return message.reply('❌ Usage: `.tr <language_code> <text>` or reply with `.tr <language_code>`');
         }
+      }
 
       if (arguments_[0].length === 2) {
         langCode = arguments_[0];
