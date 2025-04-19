@@ -46,7 +46,7 @@ export default {
       const command = commands.find(cmd => cmd.name === query);
 
       if (!command) {
-        return await message.reply(`❌ Command not found: ${query}`);
+        return await message.reply(`❌ Command not found: ${arguments_[0]}`);
       }
 
       const usage = command.usage || command.description;
