@@ -19,7 +19,7 @@ import { translate } from '@vitalets/google-translate-api';
 
 export default {
   name: '.tr',
-  description: 'Translates given text or replied message to the specified language.' 
+  description: 'Translates given text or replied message to the specified language.',
   usage: 'To translate a text type `.tr <language_code> <text>` or reply with `.tr <language_code>`',
 
   async execute(message, arguments_, client) {
