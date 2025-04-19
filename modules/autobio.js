@@ -77,7 +77,7 @@ export default {
       if (quote) {
         try {
           await client.setStatus(quote);
-          console.log(`✅ About updated"`);
+          console.log(`✅ About updated`);
         } catch (error) {
           console.error(
             '❌ Failed to set initial About status:',
@@ -91,7 +91,7 @@ export default {
         if (quote) {
           try {
             await client.setStatus(quote);
-            console.log(`✅ About updated"`);
+            console.log(`✅ About updated`);
           } catch (error) {
             console.error('❌ Failed to update About:', error.message);
           }
