@@ -20,39 +20,40 @@ import { translate } from '@vitalets/google-translate-api';
 export default {
   name: '.tr',
   description: 'Translates given text or replied message to the specified language.',
-  usage: 'To translate a text type `.tr <language_code> <text>` or reply with `.tr <language_code>` (if no language_code is given auto detects the replied text and translates to english)',
+  usage: 'To translate a text type `.tr <language_code> <text>` or reply with `.tr <language_code>` (if no language_code is given, auto-detects and translates to English)',
 
   async execute(message, arguments_, client) {
-    let langCode = arguments_[0];
-    let textToTranslate = arguments_.slice(1).join(' ');
+    let langCode;
+    let textToTranslate;
 
     const repliedMessage = message.reference
       ? await message.channel.messages.fetch(message.reference.messageId)
       : null;
 
-    if (repliedMessage) {
-      if (!repliedMessage.content) {
-        return message.reply('❌ Please reply to a text message.');
-      }
-
+    // Case 1: Message is a reply
+    if (repliedMessage && repliedMessage.content) {
       textToTranslate = repliedMessage.content;
 
-      // If only `.tr` is used
-      if (!langCode || (langCode && !textToTranslate.trim())) {
-        langCode = 'en';
-      }
+      // `.tr` or `.tr <lang>` (default to 'en' if lang not provided)
+      langCode = arguments_[0] || 'en';
     } else {
-      if (!textToTranslate && !langCode) {
+      // Case 2: Message is not a reply
+
+      if (arguments_.length === 0) {
         return message.reply('❌ Usage: `.tr <language_code> <text>` or reply with `.tr <language_code>`');
       }
 
-      if (!textToTranslate && langCode && langCode.length === 2) {
-        return message.reply('❌ Please provide text to translate or reply to a text message.');
-      }
-
-      if (!textToTranslate && langCode) {
-        textToTranslate = langCode;
+      // If the first argument is a valid language code (2 letters), assume it's a code
+      if (arguments_[0].length === 2) {
+        langCode = arguments_[0];
+        textToTranslate = arguments_.slice(1).join(' ');
+        if (!textToTranslate) {
+          return message.reply('❌ Please provide text to translate.');
+        }
+      } else {
+        // No lang code provided, default to English
         langCode = 'en';
+        textToTranslate = arguments_.join(' ');
       }
     }
 
@@ -62,7 +63,7 @@ export default {
 
       return message.reply(`*Translated from ${fromLang} to ${langCode}:*\n\n${result.text}`);
     } catch (error) {
-      console.log('Error during translation:', err);
+      console.error(error);
       return message.reply('❌ Invalid language code or failed to translate.');
     }
   },
