@@ -25,49 +25,43 @@ export default {
   async execute(message, arguments_, client) {
     let langCode = 'en'; // default language
     let textToTranslate;
-
-    // Handle replied messages
+    
     let quoted;
     try {
       quoted = await message.getQuotedMessage();
     } catch (err) {
       quoted = null;
     }
-
-    if (quoted && quoted.body && quoted.type === 'chat') {
-      // If command is a reply to a text message
+    
+    if (quoted) {
+      if (quoted.type !== 'chat') {
+        return message.reply('❌ Please provide text to translate.');
+      }
+    
       textToTranslate = quoted.body;
-
-      // If language code is provided like `.tr fr`
+    
       if (arguments_[0] && arguments_[0].length === 2) {
         langCode = arguments_[0];
       }
-
     } else {
       // Not a reply
-
       if (arguments_.length === 0) {
-        if (quoted && quoted.body && quoted.type != 'chat') {
-           return message.reply('❌ Please provide text to translate.');
-        } 
-        else {
-           return message.reply('❌ Usage: `.tr <language_code> <text>` or reply with `.tr <language_code>`');
-        }
+        return message.reply('❌ Usage: `.tr <language_code> <text>` or reply with `.tr <language_code>`');
       }
-
+    
       if (arguments_[0].length === 2) {
         langCode = arguments_[0];
         textToTranslate = arguments_.slice(1).join(' ');
-
+    
         if (!textToTranslate) {
           return message.reply('❌ Please provide text to translate.');
         }
       } else {
-        // No language code, assume default 'en'
         textToTranslate = arguments_.join(' ');
       }
     }
 
+    
     try {
       const result = await translate(textToTranslate, { to: langCode });
       const fromLang = result.raw.src;
