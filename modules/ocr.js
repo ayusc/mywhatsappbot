@@ -14,89 +14,57 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import fetch from 'node-fetch';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-const OCR_SPACE_API_KEY = process.env.OCR_SPACE_API_KEY;
-
-if (!OCR_SPACE_API_KEY) {
-  throw new Error('Your OCR_SPACE_API_KEY is not set. Please set it first.');
-}
+import { translate } from '@vitalets/google-translate-api';
 
 export default {
-  name: '.ocr',
-  description: 'Extracts text from an image using OCR',
-  usage:
-    '.ocr <lang> in reply to a image.\nIf no language is provided defaults to english or eng.',
+  name: '.tr',
+  description: 'Translates given text or replied message to the specified language.' 
+  usage: 'To translate a text type `.tr <language_code> <text>` or reply with `.tr <language_code>`',
 
   async execute(message, arguments_, client) {
-    if (!message.hasQuotedMsg) {
-      return await message.reply(
-        '❌ Please reply to some image containing text.'
-      );
-    }
+    let langCode = arguments_[0];
+    let textToTranslate = arguments_.slice(1).join(' ');
 
-    const quotedMessage = await message.getQuotedMessage();
+    // Check if replying to a message
+    const repliedMessage = message.reference
+      ? await message.channel.messages.fetch(message.reference.messageId)
+      : null;
 
-    if (!quotedMessage.hasMedia) {
-      return await message.reply(
-        '❌ Please reply to an image containing text.'
-      );
-    }
-
-    const lang = arguments_[0] || 'eng'; // Default to English if no language is given
-    const media = await quotedMessage.downloadMedia();
-
-    if (!media || media.mimetype.split('/')[0] !== 'image') {
-      return await message.reply(
-        '❌ The replied message is not a valid image.'
-      );
-    }
-
-    const reply = await message.reply(
-      `🔍 Processing image using language \`${lang}\`...`
-    );
-
-    try {
-      const imageBuffer = Buffer.from(media.data, 'base64');
-
-      const formData = new FormData();
-      formData.append('apikey', OCR_SPACE_API_KEY);
-      formData.append('language', lang);
-      formData.append('OCREngine', '2');
-      formData.append('isOverlayRequired', 'false');
-      formData.append(
-        'file',
-        new Blob([imageBuffer], { type: media.mimetype }),
-        'image.png'
-      );
-
-      const response = await fetch('https://api.ocr.space/parse/image', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      if (result.IsErroredOnProcessing) {
-        const message =
-          result.ErrorMessage?.[0] || 'Unknown OCR processing error.';
-        await reply.edit(`❌ Error while performing OCR: ${message}`);
-        return;
+    if (repliedMessage) {
+      if (!repliedMessage.content) {
+        return message.reply('❌ Please reply to some text message.');
       }
 
-      const parsedText = result.ParsedResults?.[0]?.ParsedText?.trim();
+      // If only `.tr` or `.tr <lang>` is sent in reply, set translation target accordingly
+      if (!langCode || (langCode && !textToTranslate)) {
+        textToTranslate = repliedMessage.content;
 
-      await (parsedText
-        ? reply.edit(`📃 OCR Result:\n\n${parsedText}`)
-        : reply.edit('❌ No readable text found in the image.'));
+        // Default to English if no language is specified
+        langCode = langCode || 'en';
+      }
+    } else {
+      // If not replying to a message and no text provided
+      if (!textToTranslate && !langCode) {
+        return message.reply('❌ Usage: `.tr <language_code> <text>` or reply with `.tr <language_code>`');
+      }
+
+      // If only `.tr` is used without reply or text
+      if (!textToTranslate && langCode && langCode.length === 2) {
+        return message.reply('❌ Please provide text to translate or reply to a text message.');
+      }
+
+      // If only `.tr <text>` is used, treat it as auto-detect and translate to English
+      if (!textToTranslate && langCode) {
+        textToTranslate = langCode;
+        langCode = 'en';
+      }
+    }
+
+    try {
+      const { text } = await translate(textToTranslate, { to: langCode });
+      return message.reply(`**Translated (${langCode}):** ${text}`);
     } catch (error) {
-      console.error('OCR error:', error);
-      await reply.edit(
-        '❌ Error while performing OCR.\nMake sure the language code is valid and try again.'
-      );
+      return message.reply('❌ Invalid language code or failed to translate.');
     }
   },
 };
