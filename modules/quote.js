@@ -91,7 +91,7 @@ export default {
                     replyContact.number,
                 text: replyData.body,
                 entities: [],
-                chatId: 123_456_789, // Arbitrary
+                chatId: 123456789, // Arbitrary
               };
             }
           } catch {
