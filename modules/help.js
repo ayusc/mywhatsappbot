@@ -55,7 +55,7 @@ export default {
 
     // Generate help list
     let replyMessage =
-      `*Welcome to WahBuddy - A userbot for WhatsApp written in pure JavaScript*\n\n` +
+      `*Hi there, welcome to WahBuddy 😃*\n\n*A userbot for WhatsApp written in pure JavaScript*\n\n` +
       `Here are all the bot commands:\n` +
       `To know command usage please type \`.help {command}\`\n\n`;
 
