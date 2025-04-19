@@ -63,7 +63,7 @@ export default {
 
     try {
       const { text } = await translate(textToTranslate, { to: langCode });
-      return message.reply(`**Translated (${langCode}):** ${text}`);
+      return message.reply(`**Translated (${langCode}):**\n\n${text}`);
     } catch (error) {
       return message.reply('❌ Invalid language code or failed to translate.');
     }
