@@ -1,6 +1,9 @@
 name: Generate package-lock.json
 
 on:
+  push:
+    paths:
+      - 'package.json'
   workflow_dispatch:
 
 jobs:
@@ -30,4 +33,3 @@ jobs:
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
