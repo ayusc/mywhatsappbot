@@ -327,7 +327,7 @@ export default {
         .then(async () => {
           const mediadp = await MessageMedia.fromFilePath(outputImage);
           await client.setProfilePicture(mediadp);
-          console.log('✅ First DP updated');
+          console.log('✅ DP updated');
         })
         .catch(() => {});
     }, millisUntilNextInterval);
