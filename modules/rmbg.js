@@ -21,6 +21,8 @@ import FormData from 'form-data';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import pkg from 'whatsapp-web.js';
+const { Client, LocalAuth, MessageMedia, Poll, GroupChat } = pkg;
 
 // Required for resolving __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
