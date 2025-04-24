@@ -15,7 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-async function safeEdit(message, content, retries = 3, delay = 1000) {
+async function safeEdit(message, content, retries = 5, delay = 1000) {
   for (let i = 0; i < retries; i++) {
     try {
       return await message.edit(content);
