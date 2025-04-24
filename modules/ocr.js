@@ -74,9 +74,12 @@ export default {
       formData.append('scale', 'true');
       
       formData.append(
-        'file',
-        new Blob([imageBuffer], { type: media.mimetype }),
-        'image.png'
+      'file',
+      imageBuffer,
+      {
+       filename: 'image.png',
+       contentType: media.mimetype,
+      }
       );
 
       const response = await fetch('https://api.ocr.space/parse/image', {
