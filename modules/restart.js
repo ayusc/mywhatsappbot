@@ -20,8 +20,7 @@ const CURRENT_RUN_ID = process.env.GITHUB_RUN_ID;
 
 export default {
   name: '.restart',
-  description:
-    'Restarts the userbot',
+  description: 'Restarts the userbot',
   usage: 'Type .restart in any chat to restart the userbot.',
 
   async execute(message, arguments_, client) {

@@ -14,45 +14,48 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import { translate } from '@vitalets/google-translate-api';
 
 export default {
   name: '.tr',
-  description: 'Translates given text or replied message to the specified language.',
-  usage: '`.tr <language_code> <text>` or reply with `.tr <language_code>` (defaults to English if no language_code is given)',
+  description:
+    'Translates given text or replied message to the specified language.',
+  usage:
+    '`.tr <language_code> <text>` or reply with `.tr <language_code>` (defaults to English if no language_code is given)',
 
   async execute(message, arguments_, client) {
     let langCode = 'en'; // default language
     let textToTranslate;
-    
+
     let quoted;
     try {
       quoted = await message.getQuotedMessage();
     } catch (err) {
       quoted = null;
     }
-    
+
     if (quoted) {
       if (quoted.type !== 'chat') {
         return message.reply('❌ Please provide text to translate.');
       }
-    
+
       textToTranslate = quoted.body;
-    
+
       if (arguments_[0] && arguments_[0].length === 2) {
         langCode = arguments_[0];
       }
     } else {
       // Not a reply
       if (arguments_.length === 0) {
-        return message.reply('❌ Usage: `.tr <language_code> <text>` or reply with `.tr <language_code>`');
+        return message.reply(
+          '❌ Usage: `.tr <language_code> <text>` or reply with `.tr <language_code>`'
+        );
       }
-    
+
       if (arguments_[0].length === 2) {
         langCode = arguments_[0];
         textToTranslate = arguments_.slice(1).join(' ');
-    
+
         if (!textToTranslate) {
           return message.reply('❌ Please provide text to translate.');
         }
@@ -61,15 +64,18 @@ export default {
       }
     }
 
-    
     try {
       const result = await translate(textToTranslate, { to: langCode });
       const fromLang = result.raw.src;
 
-      return message.reply(`*Translated from ${fromLang} to ${langCode}:*\n\n${result.text}`);
+      return message.reply(
+        `*Translated from ${fromLang} to ${langCode}:*\n\n${result.text}`
+      );
     } catch (error) {
       console.error(error);
-      return message.reply('❌ Failed to translate. Please check the language code or try again.');
+      return message.reply(
+        '❌ Failed to translate. Please check the language code or try again.'
+      );
     }
   },
 };

@@ -8,7 +8,7 @@ export default [
     rules: {
       // Add ESLint rules here as needed, e.g.:
       'no-unused-vars': 'warn',
-      'semi': ['error', 'always'],
+      semi: ['error', 'always'],
     },
   },
 ];

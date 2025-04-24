@@ -32,7 +32,8 @@ export default {
   name: '.quote',
   description:
     'Creates a quote sticker from a message and the next few (up to 5)',
-  usage: 'Type .quote in reply to a msg to make a sticker out of it.\nType .quote <1-5> in reply to a msg to quote the msg and next few msgs (upto 4)\nType .quote noname in reply to a msg to make a quote using phone number instead of profile name\nType .quote <1-5> noname in reply to a msg to quote the msg and next few msgs (upto 4) using phone numbers instead of profile names\n\n_Note: The command will skip any other messages except text even in case the message is a reply to non-text messages._',
+  usage:
+    'Type .quote in reply to a msg to make a sticker out of it.\nType .quote <1-5> in reply to a msg to quote the msg and next few msgs (upto 4)\nType .quote noname in reply to a msg to make a quote using phone number instead of profile name\nType .quote <1-5> noname in reply to a msg to quote the msg and next few msgs (upto 4) using phone numbers instead of profile names\n\n_Note: The command will skip any other messages except text even in case the message is a reply to non-text messages._',
   async execute(message, arguments_, client) {
     if (!message.hasQuotedMsg) {
       return message.reply('Please reply to a text message.');

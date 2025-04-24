@@ -19,7 +19,8 @@ import { autodpInterval } from './autodp.js';
 export default {
   name: '.stopdp',
   description: 'Stop updating WhatsApp profile picture automatically.',
-  usage: 'Type .stopdp in any chat to stop updating WhatsApp profile picture automatically.',
+  usage:
+    'Type .stopdp in any chat to stop updating WhatsApp profile picture automatically.',
 
   async execute(message) {
     if (autodpInterval) {

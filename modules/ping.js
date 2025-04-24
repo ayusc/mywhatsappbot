@@ -14,7 +14,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
 export default {
   name: '.ping',
   description: 'Replies with Pong and response time',
@@ -24,7 +23,7 @@ export default {
     const start = Date.now();
 
     const sentMessage = await message.reply('*Pong !*');
-    
+
     const timeTaken = ((Date.now() - start) / 1000).toFixed(3);
     // Wait for msg to register
     await new Promise(r => setTimeout(r, 3000));

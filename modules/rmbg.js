@@ -14,7 +14,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import FormData from 'form-data';
@@ -43,7 +42,9 @@ export default {
 
   async execute(message, arguments_, client) {
     if (!message.hasQuotedMsg) {
-      return await message.reply('❌ Please reply to an image to remove its background.');
+      return await message.reply(
+        '❌ Please reply to an image to remove its background.'
+      );
     }
 
     const quotedMessage = await message.getQuotedMessage();
@@ -55,7 +56,9 @@ export default {
     const media = await quotedMessage.downloadMedia();
 
     if (!media || media.mimetype.split('/')[0] !== 'image') {
-      return await message.reply('❌ The replied message is not a valid image.');
+      return await message.reply(
+        '❌ The replied message is not a valid image.'
+      );
     }
 
     try {
@@ -78,7 +81,9 @@ export default {
       if (!response.ok) {
         const errorBody = await response.text();
         console.error('Remove.bg error:', errorBody);
-        return await message.reply(`❌ Failed to remove background: ${response.statusText}`);
+        return await message.reply(
+          `❌ Failed to remove background: ${response.statusText}`
+        );
       }
 
       const buffer = await response.buffer();
@@ -88,10 +93,9 @@ export default {
       fs.writeFileSync(filePath, buffer);
       const rmbgimg = await MessageMedia.fromFilePath(filePath);
       await message.reply(rmbgimg);
-      
+
       // Clean up
       fs.unlinkSync(filePath);
-      
     } catch (error) {
       console.error('Background removal error:', error);
       await message.reply('❌ Failed to remove background from the image.');

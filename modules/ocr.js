@@ -14,7 +14,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import FormData from 'form-data';
@@ -65,22 +64,18 @@ export default {
       const imageBuffer = Buffer.from(media.data, 'base64');
 
       const formData = new FormData();
-      
+
       formData.append('apikey', OCR_SPACE_API_KEY);
       formData.append('language', lang);
       formData.append('OCREngine', '2');
       formData.append('detectOrientation', 'true');
       formData.append('isOverlayRequired', 'false');
       formData.append('scale', 'true');
-      
-      formData.append(
-      'file',
-      imageBuffer,
-      {
-       filename: 'image.png',
-       contentType: media.mimetype,
-      }
-      );
+
+      formData.append('file', imageBuffer, {
+        filename: 'image.png',
+        contentType: media.mimetype,
+      });
 
       const response = await fetch('https://api.ocr.space/parse/image', {
         method: 'POST',
@@ -104,9 +99,7 @@ export default {
     } catch (error) {
       console.error('OCR error:', error);
       await new Promise(r => setTimeout(r, 3000));
-      await reply.edit(
-        '❌ OCR failed to convert the given image to text.'
-      );
+      await reply.edit('❌ OCR failed to convert the given image to text.');
     }
   },
 };
