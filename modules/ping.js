@@ -14,6 +14,18 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+
+async function safeEdit(message, content, retries = 3, delay = 1000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await message.edit(content);
+    } catch (err) {
+      if (i === retries - 1) throw err;
+      await new Promise(res => setTimeout(res, delay));
+    }
+  }
+}
+
 export default {
   name: '.ping',
   description: 'Replies with Pong and response time',
@@ -23,14 +35,9 @@ export default {
     const start = Date.now();
 
     const sentMessage = await message.reply('*Pong !*');
-
-    const end = Date.now();
-
-    const timeTaken = ((end - start) / 1000).toFixed(3);
-
-    // Wait for msg to register
-    await new Promise(r => setTimeout(r, 3000));
-
-    await sentMessage.edit(`*Pong !*\nResponse time: ${timeTaken}s`);
+    
+    const timeTaken = ((Date.now() - start) / 1000).toFixed(3);
+    
+    await safeEdit(sentMessage, `*Pong !*\nResponse time: ${timeTaken}s`);
   },
 };
