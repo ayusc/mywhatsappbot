@@ -60,7 +60,7 @@ Here's a list of the environment variables that needs to be set:
 | `AUTO_DP_INTERVAL_MS`  | Integer | How often the user's DP should be updated (in milliseconds).                  | No        |
 | `AUTO_BIO_INTERVAL_MS` | Integer | How often the user's bio should be updated (in milliseconds).                 | No        |
 | `OCR_SPACE_API_KEY`    | String  | Required for the .ocr command. Obtain it from https://ocr.space               | Yes       |
-| `RMBG_API_KEY`    | String  | Required for the .rmbg command. Obtain it from https://www.remove.bg/dashboard#api-key               | Yes       |
+| `RMBG_API_KEY`    | String  | Required for the .rmbg command. Obtain it from https://www.remove.bg               | Yes       |
 
 
 ## Deploying
