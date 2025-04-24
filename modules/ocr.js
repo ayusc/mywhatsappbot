@@ -17,6 +17,7 @@
 
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
+import FormData from 'form-data';
 
 dotenv.config();
 
@@ -64,10 +65,14 @@ export default {
       const imageBuffer = Buffer.from(media.data, 'base64');
 
       const formData = new FormData();
+      
       formData.append('apikey', OCR_SPACE_API_KEY);
       formData.append('language', lang);
       formData.append('OCREngine', '2');
+      formData.append('detectOrientation', 'true');
       formData.append('isOverlayRequired', 'false');
+      formData.append('scale', 'true');
+      
       formData.append(
         'file',
         new Blob([imageBuffer], { type: media.mimetype }),
