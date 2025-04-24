@@ -18,6 +18,13 @@
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import FormData from 'form-data';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+// Required for resolving __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -49,8 +56,6 @@ export default {
       return await message.reply('❌ The replied message is not a valid image.');
     }
 
-    const reply = await message.reply('🔄 Removing background from image...');
-
     try {
       const imageBuffer = Buffer.from(media.data, 'base64');
 
@@ -71,22 +76,23 @@ export default {
       if (!response.ok) {
         const errorBody = await response.text();
         console.error('Remove.bg error:', errorBody);
-        return await reply.edit(`❌ Failed to remove background: ${response.statusText}`);
+        return await message.reply(`❌ Failed to remove background: ${response.statusText}`);
       }
 
-      const imageData = await response.buffer();
+      const buffer = await response.buffer();
 
-      await client.sendMessage(message.from, imageData, {
-        sendMediaAsSticker: false,
-        sendMediaAsDocument: false,
-        mimetype: 'image/png',
-        filename: 'rmbg.png',
-      });
-
-      await reply.delete(true);
+      // Save to temporary file
+      const filePath = path.join(__dirname, 'rmbg.png');
+      fs.writeFileSync(filePath, buffer);
+      const rmbgimg = await MessageMedia.fromFilePath(filePath);
+      await message.reply(rmbgimg);
+      
+      // Clean up
+      fs.unlinkSync(filePath);
+      
     } catch (error) {
       console.error('Background removal error:', error);
-      await reply.edit('❌ Failed to remove background from the image.');
+      await message.reply('❌ Failed to remove background from the image.');
     }
   },
 };
