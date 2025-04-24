@@ -69,6 +69,7 @@ export default {
         filename: 'image.png',
         contentType: media.mimetype,
       });
+      formData.append('scale', '100%');
 
       const response = await fetch('https://api.remove.bg/v1.0/removebg', {
         method: 'POST',
