@@ -32,7 +32,7 @@ export default {
   name: '.quote',
   description:
     'Creates a quote sticker from a message and the next few (up to 5)',
-  usage: 'Type .quote in reply to a msg to make a sticker out of it.\nType .quote <1-5> in reply to a msg to quote the msg and next few msgs (upto 4)',
+  usage: 'Type .quote in reply to a msg to make a sticker out of it.\nType .quote <1-5> in reply to a msg to quote the msg and next few msgs (upto 4)\nType .quote noname in reply to a msg to make a quote using phone number instead of profile name or .quote <1-5> noname in reply to a msg to quote the msg and next few msgs (upto 4) using phone numbers instead of profile names',
 
   async execute(message, arguments_, client) {
     if (!message.hasQuotedMsg) {
@@ -147,7 +147,7 @@ export default {
       fs.unlinkSync(filePath);
     } catch (error) {
       console.error('Quote generation error:', error);
-      message.reply('Something went wrong while generating the quote.');
+      await message.reply('Something went wrong while generating the quote.');
     }
   },
 };
