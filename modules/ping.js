@@ -26,7 +26,8 @@ export default {
     const sentMessage = await message.reply('*Pong !*');
     
     const timeTaken = ((Date.now() - start) / 1000).toFixed(3);
-
+    // Wait for msg to register
+    await new Promise(r => setTimeout(r, 3000));
     const msgToEdit = await client.getMessageById(sentMessage.id._serialized);
     await msgToEdit.edit(`*Pong !*\nResponse time: ${timeTaken}s`);
   },
