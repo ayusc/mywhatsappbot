@@ -15,17 +15,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-async function safeEdit(message, content, retries = 5, delay = 1000) {
-  for (let i = 0; i < retries; i++) {
-    try {
-      return await message.edit(content);
-    } catch (err) {
-      if (i === retries - 1) throw err;
-      await new Promise(res => setTimeout(res, delay));
-    }
-  }
-}
-
 export default {
   name: '.ping',
   description: 'Replies with Pong and response time',
@@ -37,7 +26,8 @@ export default {
     const sentMessage = await message.reply('*Pong !*');
     
     const timeTaken = ((Date.now() - start) / 1000).toFixed(3);
-    
-    await safeEdit(sentMessage, `*Pong !*\nResponse time: ${timeTaken}s`);
+
+    const msgToEdit = await client.getMessageById(sentMessage.id._serialized);
+    await msgToEdit.edit(`*Pong !*\nResponse time: ${timeTaken}s`);
   },
 };
