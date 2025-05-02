@@ -23,7 +23,7 @@ import mongoose from 'mongoose';
 import { MongoStore } from 'wwebjs-mongo';
 import puppeteer from 'puppeteer';
 import dotenv from 'dotenv';
-import { startCountdown } from './newaction.js';
+//import { startCountdown } from './newaction.js';
 
 const { Client, RemoteAuth } = pkg;
 
@@ -48,7 +48,7 @@ const client = new Client({
   puppeteer: {
     headless: true,
     executablePath: puppeteer.executablePath(),
-    args: ['--no-sandbox'],
+    args: ['--no-sandbox', '--disable-gpu'],
   },
 });
 
@@ -176,4 +176,4 @@ client.on('message_create', async message => {
 
 client.initialize();
 
-startCountdown().catch(console.error);
+//startCountdown().catch(console.error);
