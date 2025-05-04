@@ -85,6 +85,7 @@ async function startBot() {
   console.log('Connected to MongoDB');
 
   await restoreAuthStateFromMongo();
+
   const { state, saveCreds } = await useMultiFileAuthState(authDir);
 
   const sock = makeWASocket({
