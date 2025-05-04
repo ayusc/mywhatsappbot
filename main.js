@@ -58,12 +58,27 @@ async function saveAuthStateToMongo(attempt = 1) {
 }
 
 async function restoreAuthStateFromMongo() {
-  if (!fs.existsSync(authDir)) fs.mkdirSync(authDir);
+  console.log('Attempting to restore session from MongoDB');
+
+  if (!fs.existsSync(authDir)) {
+    console.log('Auth directory not found. Creating...');
+    fs.mkdirSync(authDir);
+  }
 
   const existingFiles = fs.readdirSync(authDir);
-  if (existingFiles.length > 0) return;
+  if (existingFiles.length > 0) {
+    console.log('Auth directory is not empty. Skipping restore.');
+    return;
+  }
+
+  if (!sessionCollection) {
+    console.warn('sessionCollection is not initialized!');
+    return;
+  }
 
   const savedCreds = await sessionCollection.find({}).toArray();
+  console.log(`Found ${savedCreds.length} session entries in MongoDB`);
+
   if (!savedCreds.length) {
     console.warn('No session found in MongoDB. Will require QR login.');
     return;
@@ -74,8 +89,9 @@ async function restoreAuthStateFromMongo() {
     fs.writeFileSync(filePath, data, 'utf-8');
   }
 
-  console.log('Session restored from MongoDB');
+  console.log('Session successfully restored from MongoDB');
 }
+
 
 async function startBot() {
   const mongoClient = new MongoClient(mongoUri);
@@ -94,10 +110,9 @@ async function startBot() {
     logger: pino({ level: 'silent' })
   });
 
-  // Update credentials locally + to Mongo
   sock.ev.on('creds.update', async () => {
-    await saveCreds(); // must call this for Baileys to be stable
-    await saveAuthStateToMongo(); // MongoDB backup
+    await saveCreds(); 
+    await saveAuthStateToMongo(); 
   });
 
   const commands = new Map();
@@ -121,21 +136,21 @@ async function startBot() {
     }
 
     if (connection === 'close') {
-  const statusCode = lastDisconnect?.error instanceof Boom
-    ? lastDisconnect.error.output.statusCode
-    : undefined;
+    const statusCode = lastDisconnect?.error instanceof Boom
+      ? lastDisconnect.error.output.statusCode
+      : undefined;
+  
+    const isLoggedOut = statusCode === DisconnectReason.loggedOut;
+  
+    console.log('Connection closed. Logged out:', isLoggedOut);
+  
+    if (isLoggedOut) {
+      console.log('Session is invalid. Clearing local auth state...');
+      fs.rmSync(authDir, { recursive: true, force: true });
+    }
 
-  const isLoggedOut = statusCode === DisconnectReason.loggedOut;
-
-  console.log('Connection closed. Logged out:', isLoggedOut);
-
-  if (isLoggedOut) {
-    console.log('Session is invalid. Clearing local auth state...');
-    fs.rmSync(authDir, { recursive: true, force: true });
-  }
-
-  startBot();
-}
+    startBot();
+    }
 
     } else if (connection === 'open') {
       console.log('Authenticated with WhatsApp');
