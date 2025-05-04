@@ -17,28 +17,24 @@
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 
-let interval = null;
-let lastQuote = '';
 dotenv.config();
 
-export const autobioInterval = () => interval;
+let interval = null;
+let lastQuote = '';
 
 async function runQuoteUpdate() {
   try {
     let quote = '';
     let attempts = 0;
 
-    while (quote.length === 0 || quote.length > 139 || quote === lastQuote) {
+    while (!quote || quote.length > 139 || quote === lastQuote) {
       const res = await fetch('https://quotes-api-self.vercel.app/quote');
       const data = await res.json();
       quote = `${data.quote} —${data.author}`;
-      // Console.log(`Fetched quote: "${quote}"`);
       attempts++;
 
       if (attempts >= 10) {
-        console.warn(
-          '⚠️ Failed to find a new short quote after 10 attempts. Skipping...'
-        );
+        console.warn('Failed to find a new short quote after 10 attempts. Skipping...');
         return null;
       }
     }
@@ -46,7 +42,7 @@ async function runQuoteUpdate() {
     lastQuote = quote;
     return quote;
   } catch (error) {
-    console.error('❌ Error fetching quote:', error.message);
+    console.error('Error fetching quote:', error.message);
     return null;
   }
 }
@@ -58,16 +54,19 @@ export default {
   usage:
     'Type .autobio in any chat to start updating WhatsApp "About" with motivational quotes every X seconds (default 60s)',
 
-  async execute(message, arguments_, client) {
-    const AUTO_BIO_INTERVAL = process.env.AUTO_BIO_INTERVAL_MS || 60_000;
+  async execute(msg, _args, sock) {
+    const AUTO_BIO_INTERVAL = parseInt(process.env.AUTO_BIO_INTERVAL_MS, 10) || 60000;
+    const jid = msg.key.remoteJid;
 
     if (interval) {
-      await message.reply('⚠️ AutoBio is already running!');
+      await sock.sendMessage(jid, { text: 'AutoBio is already running!' }, { quoted: msg });
       return;
     }
 
-    await message.reply(
-      `✅ AutoBio started.\nUpdating every ${AUTO_BIO_INTERVAL / 1000}s`
+    await sock.sendMessage(
+      jid,
+      { text: `AutoBio started. Updating every ${AUTO_BIO_INTERVAL / 1000}s` },
+      { quoted: msg }
     );
 
     const now = Date.now();
@@ -78,24 +77,21 @@ export default {
       const quote = await runQuoteUpdate();
       if (quote) {
         try {
-          await client.setStatus(quote);
-          console.log(`✅ About updated`);
+          await sock.updateProfileStatus(quote); 
+          console.log('About updated');
         } catch (error) {
-          console.error(
-            '❌ Failed to set initial About status:',
-            error.message
-          );
+          console.error('Failed to set initial About status:', error.message);
         }
       }
 
       interval = setInterval(async () => {
-        const quote = await runQuoteUpdate();
-        if (quote) {
+        const q = await runQuoteUpdate();
+        if (q) {
           try {
-            await client.setStatus(quote);
-            console.log(`✅ About updated`);
+            await sock.updateProfileStatus(q); // update profile "About"
+            console.log('About updated');
           } catch (error) {
-            console.error('❌ Failed to update About:', error.message);
+            console.error('Failed to update About:', error.message);
           }
         }
       }, AUTO_BIO_INTERVAL);
@@ -103,4 +99,4 @@ export default {
   },
 };
 
-export { interval };
+export { interval as autobioInterval };
