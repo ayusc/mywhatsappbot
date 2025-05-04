@@ -72,9 +72,10 @@ async function restoreAuthStateFromMongo() {
     console.warn('No session found in MongoDB. Will require QR login.');
     return;
   }
-
+  
   for (const { _id, data } of savedCreds) {
-    const filePath = path.join(authDir, _id);
+    fs.mkdirSync(authDir, { recursive: true });
+    const filePath = path.join(authDir, _id);    
     fs.writeFileSync(filePath, data, 'utf-8');
   }
 
