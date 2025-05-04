@@ -10,6 +10,8 @@ import qrcode from 'qrcode-terminal';
 import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
 import pino from 'pino';
+import express from 'express';
+import axios from 'axios';
 
 dotenv.config();
 
@@ -185,4 +187,33 @@ async function startBot() {
   });
 }
 
+
+// Setting up minimal server for WahBuddy
+const app = express();
+const PORT = process.env.PORT || 3000;
+const SITE_URL = process.env.SITE_URL || `http://localhost:${PORT}`;
+
+app.get('/', (req, res) => {
+  res.json({ status: 'Running' });
+});
+
+app.get('/health', (req, res) => {
+  res.json({ status: 'healthy' });
+});
+
+app.listen(PORT, () => {
+  console.log(`HTTP server running on ${SITE_URL}`);
+});
+
+function startSelfPing() {
+  setInterval(async () => {
+    try {
+      await axios.get(`https://${SITE_URL}/health`);
+    } catch (err) {
+      console.error('Error in HTTP server:', err.message);
+    }
+  }, 60 * 1000); 
+}
+
 startBot();
+startSelfPing();
