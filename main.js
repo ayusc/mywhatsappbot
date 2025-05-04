@@ -90,7 +90,7 @@ async function startBot() {
   const sock = makeWASocket({
     auth: state,
     printQRInTerminal: true,
-    logger: pino({ level: 'warn' })
+    logger: pino({ level: 'silent' })
   });
 
   // Update credentials locally + to Mongo
