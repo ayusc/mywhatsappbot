@@ -7,7 +7,7 @@ COPY package*.json ./
 RUN apk add --no-cache git python3 make g++ && \
     ln -sf python3 /usr/bin/python
 
-RUN npm install --production --omit=dev
+RUN npm install --legacy-peer-deps --omit=dev
 
 COPY . .
 
