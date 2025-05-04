@@ -21,7 +21,8 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const commands = [];
+// Load all other command modules in this folder
+const commandsList = [];
 const commandFiles = fs
   .readdirSync(__dirname)
   .filter(file => file.endsWith('.js') && file !== 'help.js');
@@ -30,7 +31,7 @@ for (const file of commandFiles) {
   const filePath = path.join(__dirname, file);
   const { default: command } = await import(`file://${filePath}`);
   if (command?.name && command?.description) {
-    commands.push(command);
+    commandsList.push(command);
   }
 }
 
@@ -38,31 +39,36 @@ export default {
   name: '.help',
   description: 'Lists all commands or shows usage for a specific command',
 
-  async execute(message, arguments_, client) {
+  async execute(msg, args, sock) {
     const prefix = '.';
+    const chatId = msg.key.remoteJid;
 
-    if (arguments_.length > 0) {
-      const query = prefix + arguments_[0];
-      const command = commands.find(cmd => cmd.name === query);
+    if (args.length > 0) {
+      const query = prefix + args[0];
+      const cmd = commandsList.find(c => c.name === query);
 
-      if (!command) {
-        return await message.reply(`❌ Command not found: ${arguments_[0]}`);
+      if (!cmd) {
+        const text = 'Command not found: ' + args[0];
+        await sock.sendMessage(chatId, { text }, { quoted: msg });
+        return;
       }
 
-      const usage = command.usage || command.description;
-      return await message.reply(`*Usage for ${command.name}:*\n\n${usage}`);
+      const usage = cmd.usage || cmd.description;
+      const text = `Usage for ${cmd.name}:\n\n${usage}`;
+      await sock.sendMessage(chatId, { text }, { quoted: msg });
+      return;
     }
 
-    // Generate help list
-    let replyMessage =
-      `*Hi there, welcome to WahBuddy 😃*\n\n*A userbot for WhatsApp written in pure JavaScript*\n\n` +
-      `Here are all the bot commands:\n` +
-      `To know command usage please type \`.help {command}\`\n\n`;
+    // No argument: list all commands
+    let text = 'Hi there, welcome to WahBuddy\n\n';
+    text += 'A userbot for WhatsApp written in pure JavaScript\n\n';
+    text += 'Here are all the bot commands:\n';
+    text += 'To know command usage please type `.help {command}`\n\n';
 
-    for (const cmd of commands) {
-      replyMessage += `\`${cmd.name}\`: ${cmd.description}\n\n`;
+    for (const c of commandsList) {
+      text += `${c.name}: ${c.description}\n\n`;
     }
 
-    await message.reply(replyMessage.trim());
+    await sock.sendMessage(chatId, { text: text.trim() }, { quoted: msg });
   },
 };
