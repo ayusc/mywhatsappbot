@@ -190,8 +190,8 @@ async function startBot() {
 
 // Setting up minimal server for WahBuddy
 const app = express();
-const PORT = process.env.PORT || 3000;
-const SITE_URL = process.env.SITE_URL || `http://localhost:${PORT}`;
+const PORT = process.env.PORT || 8000;
+const SITE_URL = process.env.SITE_URL;
 
 app.get('/', (req, res) => {
   res.json({ status: 'Running' });
