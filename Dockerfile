@@ -1,13 +1,17 @@
-FROM node:20-alpine
+FROM node:20
 
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y \
+    git \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY package*.json ./
 
-RUN apk add --no-cache git python3 make g++ && \
-    ln -sf python3 /usr/bin/python3
-
-RUN npm install --legacy-peer-deps --omit=dev
+RUN npm install --omit=dev --legacy-peer-deps
 
 COPY . .
 
