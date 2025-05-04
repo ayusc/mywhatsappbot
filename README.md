@@ -1,5 +1,5 @@
 # WahBuddy
-Blazing fast WhatsApp userbot using `Bailey's` with persistent session via MongoDB designed to on Github Actions or Koyeb
+Blazing fast WhatsApp userbot using [Baileys](https://github.com/WhiskeySockets/Baileys) with persistent session coupled with MongoDB
 
 > [!WARNING]
 > **It is not guaranteed you will not be blocked by using this bot. WhatsApp does not allow bots or unofficial clients on their platform, so this shouldn't be considered totally safe.<br>Use it at your own risk !!!**
