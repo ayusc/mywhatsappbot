@@ -4,9 +4,10 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN apk add --no-cache git
+RUN apk add --no-cache git python3 make g++ && \
+    ln -sf python3 /usr/bin/python
 
-RUN npm install --production --legacy-peer-deps
+RUN npm install --production --omit=dev
 
 COPY . .
 
