@@ -60,11 +60,6 @@ async function saveAuthStateToMongo(attempt = 1) {
 async function restoreAuthStateFromMongo() {
   console.log('Attempting to restore session from MongoDB');
 
-  if (!fs.existsSync(authDir)) {
-    console.log('Auth directory not found. Creating...');
-    fs.mkdirSync(authDir);
-  }
-
   if (!sessionCollection) {
     console.warn('sessionCollection is not initialized!');
     return;
