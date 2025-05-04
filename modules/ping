@@ -19,15 +19,26 @@ export default {
   description: 'Replies with Pong and response time',
   usage: 'Type .ping in any chat to check bot status and response time.',
 
-  async execute(message, arguments_, client) {
+  async execute(msg, _args, sock) {
     const start = Date.now();
+    const jid = msg.key.remoteJid;
 
-    const sentMessage = await message.reply('*Pong !*');
+    const sent = await sock.sendMessage(
+      jid,
+      { text: '*Pong !*' },
+      { quoted: msg }
+    );
 
     const timeTaken = ((Date.now() - start) / 1000).toFixed(3);
-    // Wait for msg to register
-    await new Promise(r => setTimeout(r, 3000));
-    const msgToEdit = await client.getMessageById(sentMessage.id._serialized);
-    await msgToEdit.edit(`*Pong !*\nResponse time: ${timeTaken}s`);
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    await sock.sendMessage(
+      jid,
+      {
+        text: `*Pong !*\nResponse time: ${timeTaken}s`,
+        edit: sent.key    
+      }
+    );
   },
 };
