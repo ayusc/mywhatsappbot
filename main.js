@@ -65,19 +65,13 @@ async function restoreAuthStateFromMongo() {
     fs.mkdirSync(authDir);
   }
 
-  const existingFiles = fs.readdirSync(authDir);
-  if (existingFiles.length > 0) {
-    console.log('Auth directory is not empty. Skipping restore.');
-    return;
-  }
-
   if (!sessionCollection) {
     console.warn('sessionCollection is not initialized!');
     return;
   }
 
   const savedCreds = await sessionCollection.find({}).toArray();
-  console.log(`Found ${savedCreds.length} session entries in MongoDB`);
+  console.log(`Found WahBuddy's session entries in MongoDB !`);
 
   if (!savedCreds.length) {
     console.warn('No session found in MongoDB. Will require QR login.');
@@ -99,6 +93,12 @@ async function startBot() {
   db = mongoClient.db(dbName);
   sessionCollection = db.collection('wahbuddy_sessions');
   console.log('Connected to MongoDB');
+
+  // Remove local auth directory 
+  if (fs.existsSync(authDir)) {
+    //console.log(`Removing local auth directory: ${authDir}`);
+    fs.rmSync(authDir, { recursive: true, force: true });
+  }
 
   await restoreAuthStateFromMongo();
 
