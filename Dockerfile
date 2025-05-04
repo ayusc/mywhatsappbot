@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN apt-get update && apt-get install -y git
+RUN apk add --no-cache git
 
 RUN npm install --production --legacy-peer-deps
 
