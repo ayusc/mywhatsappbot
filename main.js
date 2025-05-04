@@ -1,6 +1,4 @@
-// Set up crypto globally in ESM
-global.crypto = (await import('node:crypto')).default;
-
+import { crypto } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -14,6 +12,7 @@ import express from 'express';
 import axios from 'axios';
 
 dotenv.config();
+globalThis.crypto = crypto;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
