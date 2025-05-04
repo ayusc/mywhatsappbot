@@ -150,7 +150,6 @@ async function startBot() {
     }
 
     startBot();
-    }
 
     } else if (connection === 'open') {
       console.log('Authenticated with WhatsApp');
