@@ -66,7 +66,7 @@ export default {
     text += 'To know command usage please type `.help {command}`\n\n';
 
     for (const c of commandsList) {
-      text += `${c.name}: ${c.description}\n\n`;
+      text += `\`${c.name}\`: ${c.description}\n\n`;
     }
 
     await sock.sendMessage(chatId, { text: text.trim() }, { quoted: msg });
