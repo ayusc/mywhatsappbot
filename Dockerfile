@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package*.json ./
 
 RUN apk add --no-cache git python3 make g++ && \
-    ln -sf python3 /usr/bin/python
+    ln -sf python3 /usr/bin/python3
 
 RUN npm install --legacy-peer-deps --omit=dev
 
