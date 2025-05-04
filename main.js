@@ -57,6 +57,26 @@ async function saveAuthStateToMongo(attempt = 1) {
   }
 }
 
+async function restoreAuthStateFromMongo() {
+  if (!fs.existsSync(authDir)) fs.mkdirSync(authDir);
+
+  const existingFiles = fs.readdirSync(authDir);
+  if (existingFiles.length > 0) return;
+
+  const savedCreds = await sessionCollection.find({}).toArray();
+  if (!savedCreds.length) {
+    console.warn('No session found in MongoDB. Will require QR login.');
+    return;
+  }
+
+  for (const { _id, data } of savedCreds) {
+    const filePath = path.join(authDir, _id);
+    fs.writeFileSync(filePath, data, 'utf-8');
+  }
+
+  console.log('Session restored from MongoDB');
+}
+
 async function startBot() {
   const mongoClient = new MongoClient(mongoUri);
   await mongoClient.connect();
@@ -64,6 +84,7 @@ async function startBot() {
   sessionCollection = db.collection('wahbuddy_sessions');
   console.log('Connected to MongoDB');
 
+  await restoreAuthStateFromMongo();
   const { state, saveCreds } = await useMultiFileAuthState(authDir);
 
   const sock = makeWASocket({
@@ -99,14 +120,22 @@ async function startBot() {
     }
 
     if (connection === 'close') {
-      const shouldReconnect = (lastDisconnect?.error instanceof Boom)
-        ? lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut
-        : true;
+  const statusCode = lastDisconnect?.error instanceof Boom
+    ? lastDisconnect.error.output.statusCode
+    : undefined;
 
-      console.log('Connection closed. Reconnecting:', shouldReconnect);
-      if (shouldReconnect) {
-        startBot(); // restart
-      }
+  const isLoggedOut = statusCode === DisconnectReason.loggedOut;
+
+  console.log('Connection closed. Logged out:', isLoggedOut);
+
+  if (isLoggedOut) {
+    console.log('Session is invalid. Clearing local auth state...');
+    fs.rmSync(authDir, { recursive: true, force: true });
+  }
+
+  startBot();
+}
+
     } else if (connection === 'open') {
       console.log('Authenticated with WhatsApp');
       console.log('WhatsApp is ready');
