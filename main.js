@@ -25,6 +25,10 @@ let sockInstance = null;
 
 async function saveAuthStateToMongo(attempt = 1) {
   try {
+    if (!fs.existsSync(authDir)) {
+      throw new Error(`${authDir} does not exist`);
+    }
+
     const staging = db.collection('wahbuddy_sessions_staging');
     const main = sessionCollection;
 
@@ -55,7 +59,7 @@ async function saveAuthStateToMongo(attempt = 1) {
       console.warn(`Retrying creds update... attempt ${attempt + 1}`);
       await saveAuthStateToMongo(attempt + 1);
     } else {
-      console.error('Failed to update creds in MongoDB after 5 attempts:', err);
+      console.error(`Failed to update creds in MongoDB after ${attempt} attempts:`, err);
     }
   }
 }
