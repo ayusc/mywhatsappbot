@@ -14,11 +14,14 @@ dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+let autoDPStarted = false;
+let autoBioStarted = false;
 
 const mongoUri = process.env.MONGO_URI;
 const authDir = './wahbuddy-auth';
 const dbName = 'wahbuddy';
 let db, sessionCollection;
+let sockInstance = null;
 
 async function saveAuthStateToMongo(attempt = 1) {
   try {
@@ -48,11 +51,11 @@ async function saveAuthStateToMongo(attempt = 1) {
 
     await staging.deleteMany({});
   } catch (err) {
-    if (attempt < 3) {
+    if (attempt < 5) {
       console.warn(`Retrying creds update... attempt ${attempt + 1}`);
       await saveAuthStateToMongo(attempt + 1);
     } else {
-      console.error('Failed to update creds in MongoDB after 3 attempts:', err);
+      console.error('Failed to update creds in MongoDB after 5 attempts:', err);
     }
   }
 }
@@ -85,9 +88,7 @@ async function startBot() {
   sessionCollection = db.collection('wahbuddy_sessions');
   console.log('Connected to MongoDB');
 
-  // Remove local auth directory 
   if (fs.existsSync(authDir)) {
-    //console.log(`Removing local auth directory: ${authDir}`);
     fs.rmSync(authDir, { recursive: true, force: true });
   }
 
@@ -100,6 +101,8 @@ async function startBot() {
     printQRInTerminal: true,
     logger: pino({ level: 'silent' })
   });
+
+  sockInstance = sock; // Save instance globally
 
   sock.ev.on('creds.update', async () => {
     await saveCreds(); 
@@ -127,96 +130,83 @@ async function startBot() {
     }
 
     if (connection === 'close') {
-    const statusCode = lastDisconnect?.error instanceof Boom
-      ? lastDisconnect.error.output.statusCode
-      : undefined;
-  
-    const isLoggedOut = statusCode === DisconnectReason.loggedOut;
-  
-    console.log('Connection closed. Logged out:', isLoggedOut);
-  
-    if (isLoggedOut) {
-      console.log('Session is invalid. Clearing local auth state...');
-      fs.rmSync(authDir, { recursive: true, force: true });
-    }
+      const statusCode = lastDisconnect?.error instanceof Boom
+        ? lastDisconnect.error.output.statusCode
+        : undefined;
 
-    startBot();
+      const isLoggedOut = statusCode === DisconnectReason.loggedOut;
+
+      console.log('Connection closed. Logged out:', isLoggedOut);
+
+      if (isLoggedOut) {
+        console.log('Session is invalid. Clearing local auth state...');
+        fs.rmSync(authDir, { recursive: true, force: true });
+      }
+
+      // Cleanup previous socket
+      if (sockInstance) {
+        try {
+          sockInstance.ws?.close(); // Gracefully close WebSocket
+        } catch (e) {
+          console.warn('Error closing socket:', e.message);
+        }
+        sockInstance = null;
+      }
+
+      // Delay restart slightly to avoid race conditions
+      setTimeout(() => startBot(), 1000);
 
     } else if (connection === 'open') {
-      console.log('Authenticated with WhatsApp');
-      console.log('WhatsApp is ready');
+  console.log('Authenticated with WhatsApp');
+  console.log('WhatsApp is ready');
 
-      const autoDP = process.env.ALWAYS_AUTO_DP || 'False';
-      const autobio = process.env.ALWAYS_AUTO_BIO || 'False';
-      const SHOW_HOROSCOPE = process.env.SHOW_HOROSCOPE || 'False';
-      const fakeMessage = {
-               key: { remoteJid: sock.user.id },
-               pushName: sock.user.name || 'WahBuddy',
-               message: {},
-               participant: sock.user.id
-      };
-      
-      if (SHOW_HOROSCOPE !== 'True' && SHOW_HOROSCOPE !== 'False') {
-        throw new Error(
-          'SHOW_HOROSCOPE must be "True" or "False" (as string). Received: ' + SHOW_HOROSCOPE
-        );
-      }
+  const autoDP = process.env.ALWAYS_AUTO_DP || 'False';
+  const autobio = process.env.ALWAYS_AUTO_BIO || 'False';
+  const SHOW_HOROSCOPE = process.env.SHOW_HOROSCOPE || 'False';
 
-      if (autoDP === 'True') {
-        if (commands.has('.autodp')) {
-          try {          
-            await commands.get('.autodp').execute(fakeMessage, [], sock);
-            console.log('AutoDP enabled');
-          } catch (error) {
-            console.error('Failed to enable AutoDP', error);
-          }
-        } else {
-          console.warn('.autodp command not found');
-        }
-      }
+  const fakeMessage = {
+    key: { remoteJid: sock.user.id },
+    pushName: sock.user.name || 'WahBuddy',
+    message: {},
+    participant: sock.user.id
+  };
 
-      if (autobio === 'True') {
-        if (commands.has('.autobio')) {
-          try {           
-            await commands.get('.autobio').execute(fakeMessage, [], sock);
-            console.log('AutoBio enabled');
-          } catch (error) {
-            console.error('Failed to enable AutoBio', error);
-          }
-        } else {
-          console.warn('.autobio command not found');
-        }
-      }
-    }
-  });
+  if (SHOW_HOROSCOPE !== 'True' && SHOW_HOROSCOPE !== 'False') {
+    throw new Error(
+      'SHOW_HOROSCOPE must be "True" or "False" (as string). Received: ' + SHOW_HOROSCOPE
+    );
+  }
 
-  sock.ev.on('messages.upsert', async ({ messages, type }) => {
-    if (type !== 'notify' || !messages || !messages.length) return;
-
-    const msg = messages[0];
-    if (!msg.message || !msg.key.fromMe) return;
-
-    const sender = msg.key.remoteJid;
-    const messageContent =
-      msg.message.conversation ||
-      msg.message.extendedTextMessage?.text ||
-      msg.message.imageMessage?.caption ||
-      msg.message.videoMessage?.caption ||
-      '';
-
-    const args = messageContent.trim().split(/\s+/);
-    const command = args.shift().toLowerCase();
-
-    if (commands.has(command)) {
+  if (autoDP === 'True' && !autoDPStarted) {
+    autoDPStarted = true;
+    if (commands.has('.autodp')) {
       try {
-        await commands.get(command).execute(msg, args, sock);
-      } catch (err) {
-        console.error(`Error executing ${command}:`, err);
+        await commands.get('.autodp').execute(fakeMessage, [], sock);
+        console.log('AutoDP enabled');
+      } catch (error) {
+        console.error('Failed to enable AutoDP', error);
       }
+    } else {
+      console.warn('.autodp command not found');
     }
+  }
+
+  if (autobio === 'True' && !autoBioStarted) {
+    autoBioStarted = true;
+    if (commands.has('.autobio')) {
+      try {
+        await commands.get('.autobio').execute(fakeMessage, [], sock);
+        console.log('AutoBio enabled');
+      } catch (error) {
+        console.error('Failed to enable AutoBio', error);
+      }
+    } else {
+      console.warn('.autobio command not found');
+    }
+  }
+}
   });
 }
-
 
 // Setting up minimal server for WahBuddy
 const app = express();
