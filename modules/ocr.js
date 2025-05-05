@@ -19,6 +19,7 @@ import dotenv from 'dotenv';
 import FormData from 'form-data';
 import { writeFileSync, unlinkSync } from 'fs';
 import path from 'path';
+import { downloadMediaMessage } from '@whiskeysockets/baileys';
 
 dotenv.config();
 
@@ -45,7 +46,15 @@ export default {
 
     const lang = args[0] || 'eng';
 
-    const mediaBuffer = await sock.downloadMediaMessage({ message: quoted });
+    const mediaBuffer = await downloadMediaMessage(
+            quoted,
+            'buffer',
+            { },
+            { 
+                logger,
+                reuploadRequest: sock.updateMediaMessage
+            }
+    )
 
     if (!mediaBuffer) {
       await sock.sendMessage(sender, { text: 'Failed to download image from message.' }, { quoted: msg });
