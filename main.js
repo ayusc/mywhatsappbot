@@ -22,6 +22,9 @@ const authDir = './wahbuddy-auth';
 const dbName = 'wahbuddy';
 let db, sessionCollection;
 let sockInstance = null;
+const app = express();
+const PORT = process.env.PORT || 8000;
+const SITE_URL = process.env.SITE_URL;
 
 async function saveAuthStateToMongo(attempt = 1) {
   try {
@@ -194,17 +197,19 @@ async function startBot() {
     }
   });
 
-  // Command Handler
   sock.ev.on('messages.upsert', async ({ messages, type }) => {
-    if (!messages || !messages[0]) return;
-    const msg = messages[0];
-    if (!msg.message || msg.key.fromMe || msg.key.remoteJid === 'status@broadcast') return;
+    if (type !== 'notify' || !messages || !messages.length) return;
 
-    const messageContent = msg.message?.conversation ||
-                           msg.message?.extendedTextMessage?.text ||
-                           msg.message?.imageMessage?.caption ||
-                           msg.message?.videoMessage?.caption ||
-                           '';
+    const msg = messages[0];
+    if (!msg.message || !msg.key.fromMe) return;
+
+    const sender = msg.key.remoteJid;
+    const messageContent =
+      msg.message.conversation ||
+      msg.message.extendedTextMessage?.text ||
+      msg.message.imageMessage?.caption ||
+      msg.message.videoMessage?.caption ||
+      '';
 
     const args = messageContent.trim().split(/\s+/);
     const command = args.shift().toLowerCase();
@@ -218,11 +223,6 @@ async function startBot() {
     }
   });
 }
-
-
-const app = express();
-const PORT = process.env.PORT || 8000;
-const SITE_URL = process.env.SITE_URL;
 
 app.get('/', (req, res) => {
   res.json({ status: 'Running' });
