@@ -149,7 +149,13 @@ async function startBot() {
       const autoDP = process.env.ALWAYS_AUTO_DP || 'False';
       const autobio = process.env.ALWAYS_AUTO_BIO || 'False';
       const SHOW_HOROSCOPE = process.env.SHOW_HOROSCOPE || 'False';
-
+      const fakeMessage = {
+               key: { remoteJid: sock.user.id },
+               pushName: sock.user.name || 'WahBuddy',
+               message: {},
+               participant: sock.user.id
+      };
+      
       if (SHOW_HOROSCOPE !== 'True' && SHOW_HOROSCOPE !== 'False') {
         throw new Error(
           'SHOW_HOROSCOPE must be "True" or "False" (as string). Received: ' + SHOW_HOROSCOPE
@@ -158,11 +164,7 @@ async function startBot() {
 
       if (autoDP === 'True') {
         if (commands.has('.autodp')) {
-          try {
-            const fakeMessage = {
-              key: { remoteJid: sock.user.id, fromMe: true },
-              message: { conversation: '.autodp' }
-            };
+          try {          
             await commands.get('.autodp').execute(fakeMessage, [], sock);
             console.log('AutoDP enabled');
           } catch (error) {
@@ -175,11 +177,7 @@ async function startBot() {
 
       if (autobio === 'True') {
         if (commands.has('.autobio')) {
-          try {
-            const fakeMessage = {
-              key: { remoteJid: sock.user.id, fromMe: true },
-              message: { conversation: '.autobio' }
-            };
+          try {           
             await commands.get('.autobio').execute(fakeMessage, [], sock);
             console.log('AutoBio enabled');
           } catch (error) {
