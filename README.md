@@ -8,12 +8,14 @@ Blazing fast WhatsApp userbot using [Baileys](https://github.com/WhiskeySockets/
 
 # How to Deploy ?
 
-[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://console.koyeb.com/deploy?repo=https://github.com/ayusc/WahBuddy)
+Click on the below button to deploy WahBuddy in one click ->
 
-> [!IMPORTANT]
-> For unlimited workflow builds please keep your repository source open (thereby complying with the LICENSE) for reference click [here](https://github.com/orgs/community/discussions/26054)
+[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=git&repository=https://github.com/ayusc/WahBuddy&branch=main&name=wahbuddy)
 
-First of all you need the MONGO_URI and GITTOKEN environment variables which is crutial for running the bot and storing the session remotely. Please follow the steps to create your MongoDB URI string:
+
+## Setting the environment variables
+
+First of all you need the MONGO_URI environment variable which is crutial for running the bot and storing the session remotely. Please follow the steps to create your MongoDB URI string:
 
 1. Go to https://www.mongodb.com/cloud/atlas
 2. Complete the sign-up/login process.
@@ -28,20 +30,6 @@ First of all you need the MONGO_URI and GITTOKEN environment variables which is 
 11. Click “Allow Access
 12. It will fill in: 0.0.0.0/0
 13. Click “Confirm”
-
-Next click on your GitHub profile picture go to Settings > Developer settings > Personal access tokens.
-Select Tokens (classic).
-Then Generate a new token (classic).
-Under select scopes select everything.
-Under expiration set it to No expiration.
-You will be provided the github personal access token (copy and paste it somewhere).
-You need to set it as your GITTOKEN on next step.
-
-## Setting the environment variables
-
-> [!NOTE]
-> All your environment variables are safe under repository secrets and no one except you have the permission to view or edit them.
-
 
 Next step is setting the environment variables on which most of the userbot commands relies on.
 First of all fork this repository and then go to your forked repository settings > Security > Secrets and Variables > Action and add new repository secret.
@@ -64,17 +52,10 @@ Here's a list of the environment variables that needs to be set:
 | `OCR_SPACE_API_KEY`    | String  | Required for the .ocr command. Obtain it from https://ocr.space               | Yes       |
 | `RMBG_API_KEY`    | String  | Required for the .rmbg command. Obtain it from https://www.remove.bg               | Yes       |
 
-
 ## Deploying
 
-After you have done all the above steps go to your Github Actions, then select the "Whatsapp Bot" workflow and run it.
-At the Run Bot step you will be provided a QR for first time login. You need to scan the QR code with your mobile device. Please zoom out your page to 50% to properly scan the QR.
 After logged in the userbot is ready to use and the session is successfully saved to your MongoDB Cluster.
-
-### Note
-
-The Github Action workflow cannot run endlessly (it can run for maximum 6 hours) so the userbot will Cancel the workflow automatically after 5 hours and dispatch a new one immediately. So the bot will be down for some time. It usually takes 4-5 mins for the bot to be back again.
 
 # Trobleshooting
 
-In rare circumstances the userbot may crash due to session zip corruption in that case you need to manually drop the database which contains the RemoteAuth session files and after that you can again login via QR (from git actions)
+In rare circumstances the userbot may crash due to session file corruption in that case you need to manually drop the database which contains the whatsapp session files and after that you can again login via QR from koyeb logs
