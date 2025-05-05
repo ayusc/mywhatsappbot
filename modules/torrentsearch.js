@@ -3,14 +3,17 @@ import axios from 'axios';
 export default {
   name: '.trs',
   description: 'Fetch torrents from various providers and return magnet links',
-  usage: 'Type .trs <search-term> to find torrents',
+  usage: '.trs <search-term> to find torrents',
 
-  async execute(message, arguments_) {
-    if (!arguments_.length) {
-      return message.reply('No arguments given for search');
+  async execute(msg, args, sock) {
+    const sender = msg.key.remoteJid;
+
+    if (!args.length) {
+      await sock.sendMessage(sender, { text: 'No arguments given for search' }, { quoted: msg });
+      return;
     }
 
-    const query = arguments_.join(' ');
+    const query = args.join(' ');
     const url = `https://torrent.exonoob.in/api/all/${encodeURIComponent(query)}/1`;
     let results = [];
 
@@ -40,12 +43,13 @@ export default {
       }
 
       if (!results.length) {
-        return message.reply(`No results found for *${query}*`);
+        await sock.sendMessage(sender, { text: `No results found for *${query}*` }, { quoted: msg });
+        return;
       }
 
       let reply = `*Search results for ${query}*\n\n`;
 
-      results.forEach(result => {
+      for (const result of results) {
         reply += `*Name:* ${result.Name || 'N/A'}\n` +
                  `*Size:* ${result.Size || 'N/A'}\n` +
                  `*Upload Date:* ${result.DateUploaded || 'N/A'}\n` +
@@ -53,12 +57,12 @@ export default {
                  `*Leechers:* ${result.Leechers || 'N/A'}\n` +
                  `*Downloads:* ${result.Downloads || 'N/A'}\n` +
                  `*Magnet Link:*\n${result.Magnet || 'N/A'}\n\n`;
-      });
+      }
 
-      await message.reply(reply.trim());
+      await sock.sendMessage(sender, { text: reply.trim() }, { quoted: msg });
     } catch (err) {
       console.error('Error fetching torrents:', err.message);
-      await message.reply('Something went wrong while fetching results.');
+      await sock.sendMessage(sender, { text: 'Something went wrong while fetching results.' }, { quoted: msg });
     }
-  },
+  }
 };
