@@ -160,14 +160,17 @@ export default {
   },
 };
 
-async function fetchMessagesFromWA(sock, jid, limit) {
+async function fetchMessagesFromWA(sock, jid, count) {
   try {
-    const result = await sock.loadMessages(jid, limit);
-    return result.messages; 
-  } catch {
+    // Fetch the latest messages from the chat
+    const result = await sock.fetchMessageHistory(jid, count);
+    return result.messages;
+  } catch (err) {
+    console.error('Error fetching message history:', err);
     return [];
   }
 }
+
 
 async function getProfilePicUrl(sock, id) {
   try {
