@@ -101,7 +101,6 @@ async function downloadImage() {
         })
         .on('error', reject);
     });
-    console.log('Image downloaded successfully!');
   } catch (error) {
     console.error('Error downloading image:', error);
   }
@@ -338,14 +337,14 @@ export default {
       autodpInterval = setInterval(async () => {
         await generateImage();
         const buffer = fs.readFileSync(outputImage);
-        await sock.updateProfilePicture(message.key.participant || message.key.remoteJid, { url: buffer });
+        await sock.updateProfilePicture(message.key.participant || message.key.remoteJid, buffer);
         console.log('DP updated');
       }, intervalMs);
 
       generateImage()
         .then(async () => {
           const buffer = fs.readFileSync(outputImage);
-          await sock.updateProfilePicture(message.key.participant || message.key.remoteJid, { url: buffer });
+          await sock.updateProfilePicture(message.key.participant || message.key.remoteJid, buffer);
           console.log('DP updated');
         })
         .catch(() => {});
