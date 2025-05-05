@@ -22,8 +22,8 @@ export default {
   usage: 'Type .stopdp in any chat to stop updating WhatsApp profile picture automatically.',
 
   async execute(message, args, sock) {
-    if (autodpInterval) {
-      clearInterval(autodpInterval)
+    if (globalThis.autodpInterval) {
+      clearInterval(globalThis.autodpInterval)
       globalThis.autodpInterval = null
       await sock.sendMessage(message.key.remoteJid, { text: 'AutoDP stopped' }, { quoted: message })
     } else {
