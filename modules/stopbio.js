@@ -21,11 +21,11 @@ export default {
 
   async execute(message, args, sock) {
     if (globalThis.autobioInterval) {
-      clearInterval(globalThis.autobioInterval)
-      globalThis.autobioInterval = null
-      await sock.sendMessage(message.key.remoteJid, { text: 'AutoBio stopped' }, { quoted: message })
+      clearInterval(globalThis.autobioInterval); 
+      globalThis.autobioInterval = null;
+      await sock.sendMessage(message.key.remoteJid, { text: 'AutoBio stopped' }, { quoted: message });
     } else {
-      await sock.sendMessage(message.key.remoteJid, { text: 'AutoBio is not running' }, { quoted: message })
+      await sock.sendMessage(message.key.remoteJid, { text: 'AutoBio is not running' }, { quoted: message });
     }
   }
-}
+};
