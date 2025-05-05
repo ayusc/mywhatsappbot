@@ -294,9 +294,9 @@ export default {
   usage:
     'Type .autodp in any chat to start updating WhatsApp Profile Picture with clock, current temperature and horoscope every X seconds',
 
-  async execute(message, arguments_, client) {
+  async execute(message, arguments_, sock) {
     if (autodpInterval) {
-      await message.reply('⚠️ AutoDP is already running!');
+      await sock.sendMessage(message.key.remoteJid, { text: 'AutoDP is already running!' }, { quoted: message });
       return;
     }
 
@@ -304,14 +304,12 @@ export default {
     registerFont(fontPath, { family: 'FancyFont' });
 
     downloadImage()
-      .then(() => {
-        console.log('Profile pic downloaded.');
-      })
+      .then(() => console.log('Profile pic downloaded.'))
       .catch(console.error);
 
-    await message.reply(
-      `✅ AutoDP started.\nUpdating every ${intervalMs / 1000}s`
-    );
+    await sock.sendMessage(message.key.remoteJid, {
+      text: `AutoDP started.\nUpdating every ${intervalMs / 1000}s`
+    }, { quoted: message });
 
     const now = Date.now();
     const millisUntilNextInterval = intervalMs - (now % intervalMs);
@@ -319,19 +317,18 @@ export default {
     setTimeout(() => {
       autodpInterval = setInterval(async () => {
         await generateImage();
-        const mediadp = await MessageMedia.fromFilePath(outputImage);
-        await client.setProfilePicture(mediadp);
-        console.log('✅ DP updated');
+        const buffer = fs.readFileSync(outputImage);
+        await sock.updateProfilePicture(message.key.participant || message.key.remoteJid, { url: buffer });
+        console.log('DP updated');
       }, intervalMs);
 
-      // Do the first update exactly on sync
       generateImage()
         .then(async () => {
-          const mediadp = await MessageMedia.fromFilePath(outputImage);
-          await client.setProfilePicture(mediadp);
-          console.log('✅ DP updated');
+          const buffer = fs.readFileSync(outputImage);
+          await sock.updateProfilePicture(message.key.participant || message.key.remoteJid, { url: buffer });
+          console.log('DP updated');
         })
         .catch(() => {});
     }, millisUntilNextInterval);
-  },
-};
+  }
+}
