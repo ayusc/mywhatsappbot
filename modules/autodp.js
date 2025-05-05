@@ -143,7 +143,7 @@ async function getWeather() {
     weather.find({ search: city, degreeType: 'C' }, function (error, result) {
       if (error || !result || result.length === 0) {
         console.log(
-          '❌ Failed to get weather:',
+          'Failed to get weather:',
           error?.message || 'No results'
         );
         return resolve({
@@ -209,7 +209,7 @@ async function getAQI(cityName) {
       status,
     };
   } catch (error) {
-    console.error('❌ Error:', error.message);
+    console.error('Error:', error.message);
     return {
       aqi: 'N/A',
       status: 'N/A',
@@ -264,14 +264,14 @@ Air Quality Index (AQI): ${aqiresult.aqi} (${aqiresult.status})`;
   let width, height;
   
   if (imageUrl === 'RANDOM') {
-    image = sharp(imagePath).resize(1500, 1000, { fit: 'cover' });
     width = 1500;
     height = 1000;
+    image = sharp(imagePath).resize(width, height, { fit: 'cover' });
   } else {
-    image = sharp(imagePath);
-    const metadata = await image.metadata();
+    const metadata = await sharp(imagePath).metadata();
     width = metadata.width;
     height = metadata.height;
+    image = sharp(imagePath);
   }
 
   const canvas = createCanvas(width, height);
