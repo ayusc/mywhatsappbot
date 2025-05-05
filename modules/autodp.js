@@ -287,14 +287,25 @@ Air Quality Index (AQI): ${aqiresult.aqi} (${aqiresult.status})`;
 export default {
   name: '.autodp',
   description:
-    'Start updating WhatsApp Profile Picture with clock, current temperature and horoscope',
+    'Start updating WhatsApp Profile Picture with clock, current temperature, and horoscope',
   usage:
     'Type .autodp in any chat to start updating WhatsApp Profile Picture with clock, current temperature and horoscope every X seconds',
 
   async execute(message, arguments_, sock) {
-    if (autodpInterval) {
-      await sock.sendMessage(message.key.remoteJid, { text: 'AutoDP is already running!' }, { quoted: message });
-      return;
+    
+    if (message.fromStartup) {
+      if (autodpInterval) {
+        return;
+      }
+    } else {
+      if (autodpInterval) {
+        await sock.sendMessage(message.key.remoteJid, { text: 'AutoDP is already running!' }, { quoted: message });
+        return;
+      }
+
+      await sock.sendMessage(message.key.remoteJid, {
+        text: `AutoDP started.\nUpdating every ${intervalMs / 1000}s`
+      }, { quoted: message });
     }
 
     await ensureFontDownloaded();
@@ -303,10 +314,6 @@ export default {
     downloadImage()
       .then(() => console.log('Profile pic downloaded.'))
       .catch(console.error);
-
-    await sock.sendMessage(message.key.remoteJid, {
-      text: `AutoDP started.\nUpdating every ${intervalMs / 1000}s`
-    }, { quoted: message });
 
     const now = Date.now();
     const millisUntilNextInterval = intervalMs - (now % intervalMs);
@@ -328,4 +335,5 @@ export default {
         .catch(() => {});
     }, millisUntilNextInterval);
   }
-}
+};
+
