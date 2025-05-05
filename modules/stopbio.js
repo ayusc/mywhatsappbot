@@ -14,7 +14,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { interval } from './autobio.js'
+import { autobioInterval } from './autobio.js'
 
 export default {
   name: '.stopbio',
@@ -22,9 +22,9 @@ export default {
   usage: 'Type .stopbio in any chat to stop updating WhatsApp About automatically.',
 
   async execute(message, args, sock) {
-    if (interval) {
-      clearInterval(interval)
-      globalThis.interval = null
+    if (autobioInterval) {
+      clearInterval(autobioInterval)
+      globalThis.autobioInterval = null
       await sock.sendMessage(message.key.remoteJid, { text: 'AutoBio stopped' }, { quoted: message })
       await sock.sendMessage(message.key.remoteJid, { delete: message.key })
     } else {
