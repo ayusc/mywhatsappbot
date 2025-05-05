@@ -31,7 +31,11 @@ export default {
   description:
     'Creates a quote sticker from a message and the next few (up to 5)',
   usage:
-    'Type .quote in reply to a msg to make a sticker out of it.\nType .quote <1-5> in reply to a msg to quote the msg and next few msgs (upto 4)\nType .quote noname in reply to a msg to make a quote using phone number instead of profile name\nType .quote <1-5> noname in reply to a msg to quote the msg and next few msgs (upto 4) using phone numbers instead of profile names\n\nNote: The command will skip any other messages except text even in case the message is a reply to non-text messages.',
+    'Type .quote in reply to a msg to make a sticker out of it.\n' +
+    'Type .quote <1-5> in reply to a msg to quote the msg and next few msgs (upto 4)\n' +
+    'Type .quote noname in reply to a msg to make a quote using phone number instead of profile name\n' +
+    'Type .quote <1-5> noname in reply to a msg to quote the msg and next few msgs (upto 4) using phone numbers instead of profile names\n\n' +
+    'Note: The command will skip any other messages except text even in case the message is a reply to non-text messages.',
 
   async execute(msg, args, sock) {
     const jid = msg.key.remoteJid;
@@ -59,18 +63,19 @@ export default {
     }
 
     const useNumberAsName = args.includes('noname');
-    const allMsgs = await fetchMessagesFromWA(sock, jid, 30);
+    const allMsgs = await fetchMessagesFromWA(sock, jid, 10);
+
     const quotedMsgId = msg.message?.extendedTextMessage?.contextInfo?.stanzaId;
-    const startIndex = allMsgs.findIndex(m => m.key.id === quotedMsgId);
+    const startIndex = allMsgs.findIndex(m => m.key.id?.startsWith(quotedMsgId));
 
     if (startIndex === -1) {
       return await sock.sendMessage(jid, { text: 'Could not find the message sequence.' }, { quoted: msg });
     }
 
-    const textMsgs = allMsgs.slice(startIndex).filter(m => {
+    const textMsgs = allMsgs.slice(startIndex, startIndex + count).filter(m => {
       const type = getContentType(m.message);
       return type === 'conversation' || (type === 'extendedTextMessage' && m.message?.extendedTextMessage?.text);
-    }).slice(0, count);
+    });
 
     const messages = [];
 
@@ -158,7 +163,7 @@ export default {
 async function fetchMessagesFromWA(sock, jid, limit) {
   try {
     const result = await sock.loadMessages(jid, limit);
-    return result.messages.reverse();
+    return result.messages; 
   } catch {
     return [];
   }
