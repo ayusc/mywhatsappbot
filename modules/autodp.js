@@ -89,19 +89,22 @@ const outputImage = path.join(__dirname, 'output.jpg');
 
 async function downloadImage() {
   const file = fs.createWriteStream(imagePath);
-  await new Promise((resolve, reject) => {
-    https
-      .get(imageUrl, res => {
-        if (res.statusCode !== 200)
-          return reject(
-            new Error(`Failed to download image: ${res.statusCode}`)
-          );
-        res.pipe(file);
-        file.on('finish', () => file.close(resolve));
-        file.on('error', reject);
-      })
-      .on('error', reject);
-  });
+  try {
+    await new Promise((resolve, reject) => {
+      https
+        .get(imageUrl, res => {
+          if (res.statusCode !== 200)
+            return reject(new Error(`Failed to download image: ${res.statusCode}`));
+          res.pipe(file);
+          file.on('finish', () => file.close(resolve));
+          file.on('error', reject);
+        })
+        .on('error', reject);
+    });
+    console.log('Image downloaded successfully!');
+  } catch (error) {
+    console.error('Error downloading image:', error);
+  }
 }
 
 async function getWeather() {
@@ -202,6 +205,19 @@ async function getHoroscopes() {
 }
 
 async function generateImage() {
+  await downloadImage();
+
+  if (!fs.existsSync(imagePath)) {
+    console.error("Image not found, cannot process.");
+    return;
+  }
+
+  const imageSize = fs.statSync(imagePath).size;
+  if (imageSize === 0) {
+    console.error("Downloaded image is empty!");
+    return;
+  }
+
   const weatherInfo = await getWeather();
   const aqiresult = await getAQI(city);
   const dateText = getDateTimeString();
@@ -220,9 +236,7 @@ Air Quality Index (AQI): ${aqiresult.aqi} (${aqiresult.status})`;
   const canvas = createCanvas(width, height);
   const context = canvas.getContext('2d');
 
-  // Clear and setup canvas
   context.clearRect(0, 0, width, height);
-
   context.textAlign = 'center';
   context.textBaseline = 'middle';
   context.font = 'bold 35px FancyFont';
@@ -249,7 +263,7 @@ Air Quality Index (AQI): ${aqiresult.aqi} (${aqiresult.status})`;
   const x = safePadding;
   let y = 30;
 
-  if (process.env.SHOW_HOROSCOPE === 'True') {
+  if (SHOW_HOROSCOPE === 'True') {
     const horoscopeLine = `Today's Horoscope for ${sign}: ${daily}`;
     const wrappedLines = wrapText(horoscopeLine, width - safePadding * 2);
     for (const line of wrappedLines) {
@@ -282,6 +296,8 @@ Air Quality Index (AQI): ${aqiresult.aqi} (${aqiresult.status})`;
     .composite([{ input: overlayBuffer, top: 0, left: 0 }])
     .jpeg({ quality: 100 })
     .toFile(outputImage);
+
+  console.log('Image generated successfully!');
 }
 
 export default {
