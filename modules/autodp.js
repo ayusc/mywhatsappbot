@@ -87,10 +87,6 @@ async function ensureFontDownloaded() {
 const imagePath = path.join(__dirname, 'dp.jpg');
 const outputImage = path.join(__dirname, 'output.jpg');
 
-const fs = require('fs');
-const https = require('https');
-const fetch = require('node-fetch');
-
 async function downloadImage(imageUrl, imagePath) {
   const MAX_RETRIES = 3;
 
