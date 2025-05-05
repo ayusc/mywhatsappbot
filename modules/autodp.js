@@ -64,27 +64,6 @@ function getDateTimeString() {
   return `${day} ${dd}.${mm}.${yyyy} ${time}`;
 }
 
-async function fetchRandomNinjaImage(destinationPath) {
-  const apiKey = process.env.API_NINJAS_KEY;
-  if (!apiKey) {
-    throw new Error('API_NINJAS_KEY is not defined in environment variables.');
-  }
-
-  const response = await fetch('https://api.api-ninjas.com/v1/randomimage', {
-    headers: {
-      'X-Api-Key': apiKey,
-      'Accept': 'image/jpg',
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch random image: ${response.status}`);
-  }
-
-  const buffer = await response.arrayBuffer();
-  fs.writeFileSync(destinationPath, Buffer.from(buffer));
-}
-
 async function ensureFontDownloaded() {
   if (fs.existsSync(fontPath) && fs.statSync(fontPath).size >= 10_000) return;
 
@@ -111,32 +90,40 @@ const outputImage = path.join(__dirname, 'output.jpg');
 async function downloadImage() {
   if (imageUrl === 'RANDOM') {
     try {
-      await fetchRandomNinjaImage(imagePath);
-      //console.log('Random image downloaded from API Ninjas.');
-    } catch (err) {
-      console.error('Failed to fetch random image. Using fallback.');
-      await downloadFallbackImage();
+      const response = await fetch('https://picsum.photos/1500/1000', {
+        redirect: 'follow',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch random image: ${response.status}`);
+      }
+
+      const buffer = await response.arrayBuffer();
+      fs.writeFileSync(imagePath, Buffer.from(buffer));
+      return;
+    } catch (error) {
+      console.error('Failed to fetch random image:', error.message);
+      return;
     }
-  } else {
-    await downloadFallbackImage();
+  }
+
+  const file = fs.createWriteStream(imagePath);
+  try {
+    await new Promise((resolve, reject) => {
+      https
+        .get(imageUrl, res => {
+          if (res.statusCode !== 200)
+            return reject(new Error(`Failed to download image: ${res.statusCode}`));
+          res.pipe(file);
+          file.on('finish', () => file.close(resolve));
+          file.on('error', reject);
+        })
+        .on('error', reject);
+    });
+  } catch (error) {
+    console.error('Error downloading image:', error);
   }
 }
-
-async function downloadFallbackImage() {
-  const file = fs.createWriteStream(imagePath);
-  return new Promise((resolve, reject) => {
-    https
-      .get(imageUrl, res => {
-        if (res.statusCode !== 200)
-          return reject(new Error(`Failed to download image: ${res.statusCode}`));
-        res.pipe(file);
-        file.on('finish', () => file.close(resolve));
-        file.on('error', reject);
-      })
-      .on('error', reject);
-  });
-}
-
 
 async function getWeather() {
   return new Promise(resolve => {
@@ -260,22 +247,10 @@ Wind ${weatherInfo.windSpeed}, Humidity ${weatherInfo.humidity}, Rainfall Chance
 Current Condtions: ${weatherInfo.sky}, Today's Forecast: ${weatherInfo.forecastText}
 Air Quality Index (AQI): ${aqiresult.aqi} (${aqiresult.status})`;
 
-  let baseImageBuffer;
-  let width, height;
-  
-  if (imageUrl === 'RANDOM') {
-    width = 1500;
-    height = 1000;
-    baseImageBuffer = await sharp(imagePath)
-      .resize(width, height, { fit: 'cover' })
-      .toBuffer(); // materialize resize
-  } else {
-    baseImageBuffer = fs.readFileSync(imagePath);
-    const metadata = await sharp(baseImageBuffer).metadata();
-    width = metadata.width;
-    height = metadata.height;
-  }
-
+  const image = sharp(imagePath);
+  const metadata = await image.metadata();
+  const width = metadata.width;
+  const height = metadata.height;
 
   const canvas = createCanvas(width, height);
   const context = canvas.getContext('2d');
