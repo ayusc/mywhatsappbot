@@ -260,19 +260,22 @@ Wind ${weatherInfo.windSpeed}, Humidity ${weatherInfo.humidity}, Rainfall Chance
 Current Condtions: ${weatherInfo.sky}, Today's Forecast: ${weatherInfo.forecastText}
 Air Quality Index (AQI): ${aqiresult.aqi} (${aqiresult.status})`;
 
-  let image;
+  let baseImageBuffer;
   let width, height;
   
   if (imageUrl === 'RANDOM') {
     width = 1500;
     height = 1000;
-    image = sharp(imagePath).resize(width, height, { fit: 'cover' });
+    baseImageBuffer = await sharp(imagePath)
+      .resize(width, height, { fit: 'cover' })
+      .toBuffer(); // materialize resize
   } else {
-    const metadata = await sharp(imagePath).metadata();
+    baseImageBuffer = fs.readFileSync(imagePath);
+    const metadata = await sharp(baseImageBuffer).metadata();
     width = metadata.width;
     height = metadata.height;
-    image = sharp(imagePath);
   }
+
 
   const canvas = createCanvas(width, height);
   const context = canvas.getContext('2d');
@@ -333,10 +336,10 @@ Air Quality Index (AQI): ${aqiresult.aqi} (${aqiresult.status})`;
 
   const overlayBuffer = canvas.toBuffer();
 
-  await sharp(imagePath)
-    .composite([{ input: overlayBuffer, top: 0, left: 0 }])
-    .jpeg({ quality: 100 })
-    .toFile(outputImage);
+  await sharp(baseImageBuffer)
+  .composite([{ input: overlayBuffer, top: 0, left: 0 }])
+  .jpeg({ quality: 100 })
+  .toFile(outputImage);
 
   console.log('Image generated successfully!');
 }
