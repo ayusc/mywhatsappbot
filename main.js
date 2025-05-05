@@ -130,33 +130,21 @@ async function startBot() {
     }
 
     if (connection === 'close') {
-      const statusCode = lastDisconnect?.error instanceof Boom
-        ? lastDisconnect.error.output.statusCode
-        : undefined;
+  const statusCode = lastDisconnect?.error instanceof Boom
+    ? lastDisconnect.error.output.statusCode
+    : undefined;
 
-      const isLoggedOut = statusCode === DisconnectReason.loggedOut;
+  const isLoggedOut = statusCode === DisconnectReason.loggedOut;
 
-      console.log('Connection closed. Logged out:', isLoggedOut);
+  console.log('Connection closed. Logged out:', isLoggedOut);
 
-      if (isLoggedOut) {
-        console.log('Session is invalid. Clearing local auth state...');
-        fs.rmSync(authDir, { recursive: true, force: true });
-      }
-
-      // Cleanup previous socket
-      if (sockInstance) {
-        try {
-          sockInstance.ws?.close(); // Gracefully close WebSocket
-        } catch (e) {
-          console.warn('Error closing socket:', e.message);
-        }
-        sockInstance = null;
-      }
-
-      // Delay restart slightly to avoid race conditions
-      setTimeout(() => startBot(), 1000);
-
-    } else if (connection === 'open') {
+  if (isLoggedOut) {
+    console.log('Session is invalid. Clearing local auth state...');
+    fs.rmSync(authDir, { recursive: true, force: true });
+    await startBot(); 
+  }
+ }
+ else if (connection === 'open') {
   console.log('Authenticated with WhatsApp');
   console.log('WhatsApp is ready');
 
