@@ -174,7 +174,7 @@ async function fetchMessagesFromWA(sock, jid, count) {
 
 async function getProfilePicUrl(sock, id) {
   try {
-    return await sock.profilePictureUrl(id, 'image') || 'https://i.ibb.co/d4qcHwdj/blank-profile-picture-973460-1280.png';
+    return await sock.profilePictureUrl(id, 'image');
   } catch {
     return 'https://i.ibb.co/d4qcHwdj/blank-profile-picture-973460-1280.png';
   }
