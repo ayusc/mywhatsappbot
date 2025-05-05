@@ -58,16 +58,22 @@ export default {
     const AUTO_BIO_INTERVAL = parseInt(process.env.AUTO_BIO_INTERVAL_MS, 10) || 60000;
     const jid = msg.key.remoteJid;
 
-    if (interval) {
-      await sock.sendMessage(jid, { text: 'AutoBio is already running!' }, { quoted: msg });
-      return;
-    }
+    if (msg.fromStartup) {
+      if (interval) {
+        return; 
+      }
+    } else {
+      if (interval) {
+        await sock.sendMessage(jid, { text: 'AutoBio is already running!' }, { quoted: msg });
+        return;
+      }
 
-    await sock.sendMessage(
-      jid,
-      { text: `AutoBio started. Updating every ${AUTO_BIO_INTERVAL / 1000}s` },
-      { quoted: msg }
-    );
+      await sock.sendMessage(
+        jid,
+        { text: `AutoBio started. Updating every ${AUTO_BIO_INTERVAL / 1000}s` },
+        { quoted: msg }
+      );
+    }
 
     const now = Date.now();
     const nextAligned = Math.ceil(now / AUTO_BIO_INTERVAL) * AUTO_BIO_INTERVAL;
@@ -100,3 +106,4 @@ export default {
 };
 
 export { interval as autobioInterval };
+
