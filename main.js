@@ -157,7 +157,7 @@ async function startBot() {
         pushName: sock.user.name || 'WahBuddy',
         message: {},
         participant: sock.user.id,
-        fromStartup: true // <- Added flag to suppress message on startup
+        fromStartup: true
       };
 
       if (SHOW_HOROSCOPE !== 'True' && SHOW_HOROSCOPE !== 'False') {
@@ -193,30 +193,32 @@ async function startBot() {
       }
     }
   });
+
+  // Command Handler
+  sock.ev.on('messages.upsert', async ({ messages, type }) => {
+    if (!messages || !messages[0]) return;
+    const msg = messages[0];
+    if (!msg.message || msg.key.fromMe || msg.key.remoteJid === 'status@broadcast') return;
+
+    const messageContent = msg.message?.conversation ||
+                           msg.message?.extendedTextMessage?.text ||
+                           msg.message?.imageMessage?.caption ||
+                           msg.message?.videoMessage?.caption ||
+                           '';
+
+    const args = messageContent.trim().split(/\s+/);
+    const command = args.shift().toLowerCase();
+
+    if (commands.has(command)) {
+      try {
+        await commands.get(command).execute(msg, args, sock);
+      } catch (err) {
+        console.error(`Error executing ${command}:`, err);
+      }
+    }
+  });
 }
 
-sock.ev.on('messages.upsert', async ({ messages, type }) => {
-  if (!messages || !messages[0]) return;
-  const msg = messages[0];
-  if (!msg.message || msg.key.fromMe || msg.key.remoteJid === 'status@broadcast') return;
-
-  const messageContent = msg.message?.conversation || 
-                         msg.message?.extendedTextMessage?.text || 
-                         msg.message?.imageMessage?.caption || 
-                         msg.message?.videoMessage?.caption || 
-                         '';
-
-  const args = messageContent.trim().split(/\s+/);
-  const command = args.shift().toLowerCase();
-
-  if (commands.has(command)) {
-    try {
-      await commands.get(command).execute(msg, args, sock);
-    } catch (err) {
-      console.error(`Error executing ${command}:`, err);
-    }
-  }
-});
 
 const app = express();
 const PORT = process.env.PORT || 8000;
