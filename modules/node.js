@@ -14,16 +14,11 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import fs from 'fs';
+import path from 'path';
 import mime from 'mime-types';
-import pkg from 'whatsapp-web.js';
 
-const { MessageMedia } = pkg;
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUTPUT_FILE = path.join(__dirname, 'node_output.txt');
 
 // Create a CommonJS-compatible require function
@@ -31,58 +26,50 @@ const require = createRequire(import.meta.url);
 
 export default {
   name: '.node',
-  description: 'Executes Node.js code with WhatsApp context (msg, client)',
+  description: 'Executes Node.js code with WhatsApp context (msg, sock)',
 
-  async execute(message, arguments_, client) {
+  async execute(msg, arguments_, sock) {
     let code = '';
 
     // Extract code from current message
-    code = message.body.trim().startsWith('.node\n')
-      ? message.body.split('\n').slice(1).join('\n').trim()
-      : message.body.replace(/^\.node\s*/, '').trim();
+    code = msg.message?.conversation?.trim().startsWith('.node\n')
+      ? msg.message.conversation.split('\n').slice(1).join('\n').trim()
+      : msg.message?.conversation.replace(/^\.node\s*/, '').trim();
 
     // If no code and the message is a reply, try to extract code from the replied message
-    if (!code && message.hasQuotedMsg) {
-      const quoted = await message.getQuotedMessage();
-      code = quoted.body.trim();
+    if (!code && msg.message?.extendedTextMessage?.contextInfo?.quotedMessage) {
+      const quoted = msg.message.extendedTextMessage.contextInfo.quotedMessage;
+      code = quoted.conversation?.trim();
     }
 
-    if (!code) return message.reply('❌ No code provided.');
+    if (!code) return await sock.sendMessage(msg.key.remoteJid, { text: 'No code provided.' }, { quoted: msg });
 
     // Capture console output
     let logOutput = '';
     const originalLog = console.log;
-    console.log = (...arguments_) => {
-      logOutput +=
-        arguments_
-          .map(a => (typeof a === 'string' ? a : JSON.stringify(a, null, 2)))
-          .join(' ') + '\n';
+    console.log = (...args) => {
+      logOutput += args.map(a => (typeof a === 'string' ? a : JSON.stringify(a, null, 2))).join(' ') + '\n';
     };
 
     try {
       // Provide `require` and CommonJS compatibility inside user code
-      const asyncFunction = new Function(
-        'msg',
-        'client',
-        'require',
-        `
-          return (async () => {
-            let message = msg;
-            ${code}
-          })();
-        `
-      );
+      const asyncFunction = new Function('msg', 'sock', 'require', `
+        return (async () => {
+          let message = msg;
+          ${code}
+        })();
+      `);
 
-      const result = await asyncFunction(message, client, require);
+      const result = await asyncFunction(msg, sock, require);
 
       console.log = originalLog; // Restore console.log
 
       let finalOutput = '';
 
-      if (logOutput) finalOutput += `📥 console.log:\n${logOutput}`;
+      if (logOutput) finalOutput += `console.log:\n${logOutput}`;
       if (result !== undefined)
-        finalOutput += `\n✅ Result:\n${JSON.stringify(result, null, 2)}`;
-      finalOutput ||= '✅ Code executed successfully (no return value)';
+        finalOutput += `\nResult:\n${JSON.stringify(result, null, 2)}`;
+      finalOutput ||= 'Code executed successfully (no return value)';
 
       // Avoid sending large output directly
       if (finalOutput.length > 2000) {
@@ -93,19 +80,17 @@ export default {
           'output.txt'
         );
 
-        const chat = await message.getChat();
-
-        await client.sendMessage(chat.id._serialized, media, {
-          caption: '✅ Output too long. Sent as file.',
-          quotedMessage: message,
+        await sock.sendMessage(msg.key.remoteJid, media, {
+          caption: 'Output too long. Sent as file.',
+          quotedMessage: msg,
         });
         fs.unlinkSync(OUTPUT_FILE);
       } else {
-        await message.reply('```' + finalOutput.trim() + '```');
+        await sock.sendMessage(msg.key.remoteJid, { text: '```' + finalOutput.trim() + '```' }, { quoted: msg });
       }
     } catch (error) {
       console.log = originalLog;
-      await message.reply('❌ Error:\n```' + error.message + '```');
+      await sock.sendMessage(msg.key.remoteJid, { text: 'Error:\n```' + error.message + '```' }, { quoted: msg });
     }
   },
 };
