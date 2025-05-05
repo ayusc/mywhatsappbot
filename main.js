@@ -58,19 +58,15 @@ async function saveAuthStateToMongo(attempt = 1) {
 }
 
 async function restoreAuthStateFromMongo() {
-  console.log('Attempting to restore session from MongoDB');
-
-  if (!sessionCollection) {
-    console.warn('sessionCollection is not initialized!');
-    return;
-  }
+  console.log('Attempting to restore previous session from MongoDB');
 
   const savedCreds = await sessionCollection.find({}).toArray();
-  console.log(`Found WahBuddy's session entries in MongoDB !`);
-
+    
   if (!savedCreds.length) {
     console.warn('No session found in MongoDB. Will require QR login.');
     return;
+  } else {
+    console.log(`Found WahBuddy's session entries in MongoDB !`);
   }
   
   for (const { _id, data } of savedCreds) {
@@ -81,7 +77,6 @@ async function restoreAuthStateFromMongo() {
 
   console.log('Session successfully restored from MongoDB');
 }
-
 
 async function startBot() {
   const mongoClient = new MongoClient(mongoUri);
