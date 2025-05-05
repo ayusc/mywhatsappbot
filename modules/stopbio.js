@@ -14,23 +14,22 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { interval } from './autobio.js';
+import { interval } from './autobio.js'
 
 export default {
   name: '.stopbio',
   description: 'Stop updating WhatsApp "About" automatically.',
-  usage:
-    'Type .stopbio in any chat to stop updating WhatsApp About automatically.',
+  usage: 'Type .stopbio in any chat to stop updating WhatsApp About automatically.',
 
-  async execute(message) {
+  async execute(message, args, sock) {
     if (interval) {
-      clearInterval(interval);
-      globalThis.interval = null;
-      await message.reply('🛑 AutoBio stopped.');
-      await message.delete(true, true);
+      clearInterval(interval)
+      globalThis.interval = null
+      await sock.sendMessage(message.key.remoteJid, { text: 'AutoBio stopped' }, { quoted: message })
+      await sock.sendMessage(message.key.remoteJid, { delete: message.key })
     } else {
-      await message.reply('ℹ️ AutoBio is not running.');
-      await message.delete(true, true);
+      await sock.sendMessage(message.key.remoteJid, { text: 'AutoBio is not running' }, { quoted: message })
+      await sock.sendMessage(message.key.remoteJid, { delete: message.key })
     }
-  },
-};
+  }
+}
