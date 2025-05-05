@@ -87,7 +87,8 @@ async function ensureFontDownloaded() {
 const imagePath = path.join(__dirname, 'dp.jpg');
 const outputImage = path.join(__dirname, 'output.jpg');
 
-async function downloadImage(imageUrl, imagePath) {
+async function downloadImage(imagePath) {
+  
   const MAX_RETRIES = 3;
 
   async function tryRandomImage(attempt = 1) {
@@ -219,7 +220,7 @@ async function getHoroscopes() {
 
 async function generateImage() {
   
-  await downloadImage();
+  await downloadImage(imagePath);
 
   if (!fs.existsSync(imagePath)) {
     console.error("Image not found, cannot process.");
