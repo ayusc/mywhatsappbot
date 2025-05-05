@@ -64,6 +64,20 @@ function getDateTimeString() {
   return `${day} ${dd}.${mm}.${yyyy} ${time}`;
 }
 
+async function getRandomUnsplashImage() {
+  const accessKey = process.env.UNSPLASH_API_KEY;
+  const apiUrl = `https://api.unsplash.com/photos/random?orientation=landscape&count=1&content_filter=high&client_id=${accessKey}`;
+
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+    return data?.urls?.full || null;
+  } catch (error) {
+    console.error('Error fetching from Unsplash:', error);
+    return null;
+  }
+}
+
 async function ensureFontDownloaded() {
   if (fs.existsSync(fontPath) && fs.statSync(fontPath).size >= 10_000) return;
 
@@ -88,11 +102,22 @@ const imagePath = path.join(__dirname, 'dp.jpg');
 const outputImage = path.join(__dirname, 'output.jpg');
 
 async function downloadImage() {
+  let finalUrl = imageUrl;
+
+  if (imageUrl === 'RANDOM') {
+    const randomUrl = await getRandomUnsplashImage();
+    if (!randomUrl) {
+      console.error('Failed to fetch random image. Using default.');
+    } else {
+      finalUrl = randomUrl;
+    }
+  }
+
   const file = fs.createWriteStream(imagePath);
   try {
     await new Promise((resolve, reject) => {
       https
-        .get(imageUrl, res => {
+        .get(finalUrl, res => {
           if (res.statusCode !== 200)
             return reject(new Error(`Failed to download image: ${res.statusCode}`));
           res.pipe(file);
@@ -204,6 +229,7 @@ async function getHoroscopes() {
 }
 
 async function generateImage() {
+  
   await downloadImage();
 
   if (!fs.existsSync(imagePath)) {
@@ -227,10 +253,17 @@ Wind ${weatherInfo.windSpeed}, Humidity ${weatherInfo.humidity}, Rainfall Chance
 Current Condtions: ${weatherInfo.sky}, Today's Forecast: ${weatherInfo.forecastText}
 Air Quality Index (AQI): ${aqiresult.aqi} (${aqiresult.status})`;
 
-  const image = sharp(imagePath);
+  let width, height;
+  let image = sharp(imagePath);
+
+  if (imageUrl === 'RANDOM') {
+  image = image.resize(1500, 1000, { fit: 'cover' });
+  }
+
   const metadata = await image.metadata();
-  const width = metadata.width;
-  const height = metadata.height;
+  width = metadata.width;
+  height = metadata.height;
+
 
   const canvas = createCanvas(width, height);
   const context = canvas.getContext('2d');
