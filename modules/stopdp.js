@@ -14,21 +14,20 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { autodpInterval } from './autodp.js';
+import { autodpInterval } from './autodp.js'
 
 export default {
   name: '.stopdp',
   description: 'Stop updating WhatsApp profile picture automatically.',
-  usage:
-    'Type .stopdp in any chat to stop updating WhatsApp profile picture automatically.',
+  usage: 'Type .stopdp in any chat to stop updating WhatsApp profile picture automatically.',
 
-  async execute(message) {
+  async execute(message, args, sock) {
     if (autodpInterval) {
-      clearInterval(autodpInterval);
-      globalThis.autodpInterval = null;
-      await message.reply('🛑 AutoDP stopped.');
+      clearInterval(autodpInterval)
+      globalThis.autodpInterval = null
+      await sock.sendMessage(message.key.remoteJid, { text: 'AutoDP stopped' }, { quoted: message })
     } else {
-      await message.reply('ℹ️ AutoDP is not running.');
+      await sock.sendMessage(message.key.remoteJid, { text: 'AutoDP is not running' }, { quoted: message })
     }
-  },
-};
+  }
+}
