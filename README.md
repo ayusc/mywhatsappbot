@@ -8,6 +8,8 @@ Blazing fast WhatsApp userbot using [Baileys](https://github.com/WhiskeySockets/
 
 # How to Deploy ?
 
+[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://console.koyeb.com/deploy?repo=https://github.com/ayusc/WahBuddy)
+
 > [!IMPORTANT]
 > For unlimited workflow builds please keep your repository source open (thereby complying with the LICENSE) for reference click [here](https://github.com/orgs/community/discussions/26054)
 
