@@ -340,10 +340,6 @@ export default {
     await ensureFontDownloaded();
     registerFont(fontPath, { family: 'FancyFont' });
 
-    downloadImage()
-      .then(() => console.log('Profile pic downloaded.'))
-      .catch(console.error);
-
     const now = Date.now();
     const millisUntilNextInterval = intervalMs - (now % intervalMs);
 
