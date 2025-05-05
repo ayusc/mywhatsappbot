@@ -23,9 +23,6 @@ import sharp from 'sharp';
 import fetch from 'node-fetch';
 import weather from 'weather-js';
 import dotenv from 'dotenv';
-import pkg from 'whatsapp-web.js';
-
-const { Client, LocalAuth, MessageMedia, Poll, GroupChat } = pkg;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
