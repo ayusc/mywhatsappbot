@@ -165,8 +165,7 @@ async function startBot() {
       }
     } else if (connection === 'open') {
       console.log('Authenticated with WhatsApp');
-      console.log('WhatsApp is ready');
-
+      
       const autoDP = process.env.ALWAYS_AUTO_DP || 'False';
       const autobio = process.env.ALWAYS_AUTO_BIO || 'False';
       const SHOW_HOROSCOPE = process.env.SHOW_HOROSCOPE || 'False';
