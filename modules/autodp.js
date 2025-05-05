@@ -114,48 +114,6 @@ async function downloadImage(imageUrl, imagePath) {
       }
       return false;
     }
-  }
-
-  async function tryDownloadImage(url, attempt = 1) {
-    const file = fs.createWriteStream(imagePath);
-    return new Promise((resolve, reject) => {
-      https
-        .get(url, res => {
-          if (res.statusCode !== 200) {
-            file.close();
-            fs.unlinkSync(imagePath);
-            if (attempt < MAX_RETRIES) {
-              console.warn(`Attempt ${attempt} failed with status ${res.statusCode}, retrying...`);
-              return resolve(tryDownloadImage(url, attempt + 1));
-            } else {
-              return reject(new Error(`Failed to download image after ${MAX_RETRIES} attempts`));
-            }
-          }
-          res.pipe(file);
-          file.on('finish', () => file.close(resolve));
-          file.on('error', err => reject(err));
-        })
-        .on('error', err => {
-          if (attempt < MAX_RETRIES) {
-            console.warn(`Attempt ${attempt} failed with error, retrying...`);
-            return resolve(tryDownloadImage(url, attempt + 1));
-          } else {
-            return reject(err);
-          }
-        });
-    });
-  }
-
-  if (imageUrl === 'RANDOM') {
-    const success = await tryRandomImage();
-    if (!success) console.error('All attempts to fetch random image failed.');
-  } else {
-    try {
-      await tryDownloadImage(imageUrl);
-    } catch (error) {
-      console.error('Error downloading image:', error.message);
-    }
-  }
 }
 
 async function getWeather() {
