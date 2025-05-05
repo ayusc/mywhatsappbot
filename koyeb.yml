@@ -1,0 +1,39 @@
+name: WahBuddy
+
+type: buildpack
+
+buildpack: heroku/nodejs
+
+region: us-east-1
+
+instance_type: shared-cpu-1x  
+
+envs:
+  - name: MONGO_URI
+    value: "your-mongo-uri"
+  - name: GITTOKEN
+    value: "your-github-token (if using github action else None)"
+  - name: ALWAYS_AUTO_DP
+    value: "False"
+  - name: ALWAYS_AUTO_BIO
+    value: "False"
+  - name: SHOW_HOROSCOPE
+    value: "False"
+  - name: ZODIAC_SIGN
+    value: "your zodiac-sign (if using SHOW_HOROSCOPE else None)"
+  - name: CITY
+    value: "New York"
+  - name: IMAGE_URL
+    value: "https://example.com/profile.jpg"
+  - name: TIME_ZONE
+    value: "Asia/Kolkata"
+  - name: AUTO_DP_INTERVAL_MS
+    value: "60000"
+  - name: AUTO_BIO_INTERVAL_MS
+    value: "60000"
+  - name: OCR_SPACE_API_KEY
+    value: "your-ocr-space-api-key"
+  - name: RMBG_API_KEY
+    value: "your-remove-bg-api-key"
+  - name: SITE_URL
+    value: "{{ KOYEB_PUBLIC_DOMAIN }}"
