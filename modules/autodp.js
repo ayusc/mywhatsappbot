@@ -98,9 +98,9 @@ async function downloadImage(imageUrl, imagePath) {
 
       if (!response.ok) {
         console.warn(`Attempt ${attempt} - Bad response: ${response.status}`);
-      if (attempt < MAX_RETRIES) {
-        return await tryRandomImage(attempt + 1);
-      }
+        if (attempt < MAX_RETRIES) {
+          return await tryRandomImage(attempt + 1);
+        }
         return false;
       }
 
@@ -114,7 +114,11 @@ async function downloadImage(imageUrl, imagePath) {
       }
       return false;
     }
+  }
+
+  return await tryRandomImage();
 }
+
 
 async function getWeather() {
   return new Promise(resolve => {
