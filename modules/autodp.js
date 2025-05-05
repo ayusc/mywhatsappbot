@@ -88,7 +88,6 @@ const imagePath = path.join(__dirname, 'dp.jpg');
 const outputImage = path.join(__dirname, 'output.jpg');
 
 async function downloadImage(imagePath) {
-  
   const MAX_RETRIES = 3;
 
   async function tryRandomImage(attempt = 1) {
@@ -119,7 +118,6 @@ async function downloadImage(imagePath) {
 
   return await tryRandomImage();
 }
-
 
 async function getWeather() {
   return new Promise(resolve => {
