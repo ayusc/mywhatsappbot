@@ -87,41 +87,78 @@ async function ensureFontDownloaded() {
 const imagePath = path.join(__dirname, 'dp.jpg');
 const outputImage = path.join(__dirname, 'output.jpg');
 
-async function downloadImage() {
-  if (imageUrl === 'RANDOM') {
+const fs = require('fs');
+const https = require('https');
+const fetch = require('node-fetch');
+
+async function downloadImage(imageUrl, imagePath) {
+  const MAX_RETRIES = 3;
+
+  async function tryRandomImage(attempt = 1) {
     try {
       const response = await fetch('https://picsum.photos/1500/1000', {
         redirect: 'follow',
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch random image: ${response.status}`);
+        console.warn(`Attempt ${attempt} - Bad response: ${response.status}`);
+      if (attempt < MAX_RETRIES) {
+        return await tryRandomImage(attempt + 1);
+      }
+        return false;
       }
 
       const buffer = await response.arrayBuffer();
       fs.writeFileSync(imagePath, Buffer.from(buffer));
-      return;
+      return true;
     } catch (error) {
-      console.error('Failed to fetch random image:', error.message);
-      return;
+      console.error(`Attempt ${attempt} - Failed to fetch random image:`, error.message);
+      if (attempt < MAX_RETRIES) {
+        return await tryRandomImage(attempt + 1);
+      }
+      return false;
     }
   }
 
-  const file = fs.createWriteStream(imagePath);
-  try {
-    await new Promise((resolve, reject) => {
+  async function tryDownloadImage(url, attempt = 1) {
+    const file = fs.createWriteStream(imagePath);
+    return new Promise((resolve, reject) => {
       https
-        .get(imageUrl, res => {
-          if (res.statusCode !== 200)
-            return reject(new Error(`Failed to download image: ${res.statusCode}`));
+        .get(url, res => {
+          if (res.statusCode !== 200) {
+            file.close();
+            fs.unlinkSync(imagePath);
+            if (attempt < MAX_RETRIES) {
+              console.warn(`Attempt ${attempt} failed with status ${res.statusCode}, retrying...`);
+              return resolve(tryDownloadImage(url, attempt + 1));
+            } else {
+              return reject(new Error(`Failed to download image after ${MAX_RETRIES} attempts`));
+            }
+          }
           res.pipe(file);
           file.on('finish', () => file.close(resolve));
-          file.on('error', reject);
+          file.on('error', err => reject(err));
         })
-        .on('error', reject);
+        .on('error', err => {
+          if (attempt < MAX_RETRIES) {
+            console.warn(`Attempt ${attempt} failed with error, retrying...`);
+            return resolve(tryDownloadImage(url, attempt + 1));
+          } else {
+            return reject(err);
+          }
+        });
     });
-  } catch (error) {
-    console.error('Error downloading image:', error);
+  }
+
+  if (imageUrl === 'RANDOM') {
+    const success = await tryRandomImage();
+    if (!success) console.error('All attempts to fetch random image failed.');
+  } else {
+    try {
+      await tryDownloadImage(imageUrl);
+    } catch (error) {
+      console.error('Error downloading image:', error.message);
+    }
   }
 }
 
