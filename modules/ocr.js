@@ -21,7 +21,7 @@ import { writeFileSync, unlinkSync } from 'fs';
 import path from 'path';
 import pino from 'pino';
 const logger = pino();
-import { downloadMediaMessage } from '@whiskeysockets/baileys';
+import { downloadMediaMessage } from 'baileys';
 
 dotenv.config();
 

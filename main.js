@@ -17,7 +17,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { makeWASocket, useMultiFileAuthState, DisconnectReason } from '@whiskeysockets/baileys';
+import { makeWASocket, useMultiFileAuthState, DisconnectReason } from 'baileys';
 import { Boom } from '@hapi/boom';
 import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
