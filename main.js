@@ -156,17 +156,12 @@ async function startBot() {
     }
 
     if (connection === 'close') {
-      const statusCode = lastDisconnect?.error instanceof Boom
-        ? lastDisconnect.error.output.statusCode
-        : undefined;
-
-      const isLoggedOut = statusCode === DisconnectReason.loggedOut;
-      console.log('Connection closed. Logged out:', isLoggedOut);
-
-      if (isLoggedOut) {
-        console.log('Session is invalid. Clearing local auth state...');
-        fs.rmSync(authDir, { recursive: true, force: true });
-        await startBot();
+      const shouldReconnect =
+        (lastDisconnect?.error instanceof Boom &&
+         lastDisconnect.error.output?.statusCode !== DisconnectReason.loggedOut);
+      console.log("Connection closed. Reconnecting:", shouldReconnect);
+      if (shouldReconnect) {
+        startSock();
       }
     } else if (connection === 'open') {
       console.log('Authenticated with WhatsApp');
