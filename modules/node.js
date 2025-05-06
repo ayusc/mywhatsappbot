@@ -26,6 +26,30 @@ const OUTPUT_FILE = path.join(__dirname, 'node_output.txt');
 // Create a CommonJS-compatible require function
 const require = createRequire(import.meta.url);
 
+function getContentFromMsg(message) {
+  if (!message) return '';
+
+  const msgType = Object.keys(message)[0];
+  const content = message[msgType];
+
+  if (!content) return '';
+
+  switch (msgType) {
+    case 'conversation':
+      return content;
+    case 'extendedTextMessage':
+      return content.text;
+    case 'imageMessage':
+    case 'videoMessage':
+    case 'documentMessage':
+    case 'audioMessage':
+    case 'stickerMessage':
+      return content.caption || '';
+    default:
+      return '';
+  }
+}
+
 export default {
   name: '.node',
   description: 'Executes Node.js code with WhatsApp context (msg, sock)',
@@ -33,18 +57,22 @@ export default {
   async execute(msg, arguments_, sock) {
     let code = '';
 
-    // Extract code from current message
-    code = msg.message?.conversation?.trim().startsWith('.node\n')
-      ? msg.message.conversation.split('\n').slice(1).join('\n').trim()
-      : msg.message?.conversation.replace(/^\.node\s*/, '').trim();
+    const rawContent = getContentFromMsg(msg.message);
+    if (rawContent.startsWith('.node\n')) {
+      code = rawContent.split('\n').slice(1).join('\n').trim();
+    } else if (rawContent.startsWith('.node ')) {
+      code = rawContent.slice(6).trim();
+    }
 
     // If no code and the message is a reply, try to extract code from the replied message
     if (!code && msg.message?.extendedTextMessage?.contextInfo?.quotedMessage) {
       const quoted = msg.message.extendedTextMessage.contextInfo.quotedMessage;
-      code = quoted.conversation?.trim();
+      code = getContentFromMsg(quoted)?.trim();
     }
 
-    if (!code) return await sock.sendMessage(msg.key.remoteJid, { text: 'No code provided.' }, { quoted: msg });
+    if (!code) {
+      return await sock.sendMessage(msg.key.remoteJid, { text: 'No code provided.' }, { quoted: msg });
+    }
 
     // Capture console output
     let logOutput = '';
@@ -76,16 +104,19 @@ export default {
       // Avoid sending large output directly
       if (finalOutput.length > 2000) {
         fs.writeFileSync(OUTPUT_FILE, finalOutput);
-        const media = new MessageMedia(
-          mime.lookup(OUTPUT_FILE) || 'text/plain',
-          fs.readFileSync(OUTPUT_FILE).toString('base64'),
-          'output.txt'
-        );
+        const media = {
+          mimetype: mime.lookup(OUTPUT_FILE) || 'text/plain',
+          data: fs.readFileSync(OUTPUT_FILE),
+          fileName: 'output.txt',
+        };
 
-        await sock.sendMessage(msg.key.remoteJid, media, {
+        await sock.sendMessage(msg.key.remoteJid, {
+          document: media.data,
+          mimetype: media.mimetype,
+          fileName: media.fileName,
           caption: 'Output too long. Sent as file.',
-          quotedMessage: msg,
-        });
+        }, { quoted: msg });
+
         fs.unlinkSync(OUTPUT_FILE);
       } else {
         await sock.sendMessage(msg.key.remoteJid, { text: '```' + finalOutput.trim() + '```' }, { quoted: msg });
