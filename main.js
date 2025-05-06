@@ -17,7 +17,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { makeWASocket, useMultiFileAuthState, DisconnectReason } from 'baileys';
+import { makeWASocket, useMultiFileAuthState, DisconnectReason, Browsers } from 'baileys';
 import { Boom } from '@hapi/boom';
 import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
@@ -121,6 +121,7 @@ async function startBot() {
 
   const sock = makeWASocket({
     auth: state,
+    browser: Browsers.macOS("Google Chrome"),
     logger: pino({ level: 'silent' })
   });
   
