@@ -161,7 +161,7 @@ async function startBot() {
          lastDisconnect.error.output?.statusCode !== DisconnectReason.loggedOut);
       console.log("Connection closed. Reconnecting:", shouldReconnect);
       if (shouldReconnect) {
-        startSock();
+        startBot();
       }
     } else if (connection === 'open') {
       console.log('Authenticated with WhatsApp');
