@@ -25,6 +25,7 @@ import qrcode from 'qrcode-terminal';
 import pino from 'pino';
 import express from 'express';
 import axios from 'axios';
+import { fetchLatestBaileysVersion } from 'baileys';
 
 dotenv.config();
 
@@ -118,8 +119,10 @@ async function startBot() {
   await restoreAuthStateFromMongo();
 
   const { state, saveCreds } = await useMultiFileAuthState(authDir);
+  const { version } = await fetchLatestBaileysVersion();
 
   const sock = makeWASocket({
+    version: version,
     auth: state,
     browser: Browsers.macOS("Google Chrome"),
     logger: pino({ level: 'silent' })
