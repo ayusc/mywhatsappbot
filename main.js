@@ -120,8 +120,6 @@ async function startBot() {
   const { state, saveCreds } = await useMultiFileAuthState(authDir);
   const sock = makeWASocket({
     auth: state,
-    printQRInTerminal: true,
-    browser: ["WahBuddy", "MacOS", "14.5"], // updated MacOS to 14.5
     logger: pino({ level: 'silent' })
   });
 
