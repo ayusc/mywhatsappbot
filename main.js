@@ -21,6 +21,7 @@ import { makeWASocket, useMultiFileAuthState, DisconnectReason } from '@whiskeys
 import { Boom } from '@hapi/boom';
 import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
+import qrcode from 'qrcode-terminal';
 import pino from 'pino';
 import express from 'express';
 import axios from 'axios';
@@ -120,7 +121,6 @@ async function startBot() {
 
   const sock = makeWASocket({
     auth: state,
-    printQRInTerminal: true,
     logger: pino({ level: 'silent' })
   });
   
@@ -148,6 +148,7 @@ async function startBot() {
   sock.ev.on('connection.update', async ({ connection, lastDisconnect, qr }) => {
     if (qr) {
       console.log('Scan the QR code below:');
+      qrcode.generate(qr, { small: true });
     }
 
     if (connection === 'close') {
