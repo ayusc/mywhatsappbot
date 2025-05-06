@@ -19,7 +19,6 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { makeWASocket, useMultiFileAuthState, DisconnectReason } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
-import qrcode from 'qrcode-terminal';
 import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
 import pino from 'pino';
@@ -118,11 +117,13 @@ async function startBot() {
   await restoreAuthStateFromMongo();
 
   const { state, saveCreds } = await useMultiFileAuthState(authDir);
+
   const sock = makeWASocket({
     auth: state,
+    printQRInTerminal: true,
     logger: pino({ level: 'silent' })
   });
-
+  
   sockInstance = sock;
 
   sock.ev.on('creds.update', async () => {
@@ -147,7 +148,6 @@ async function startBot() {
   sock.ev.on('connection.update', async ({ connection, lastDisconnect, qr }) => {
     if (qr) {
       console.log('Scan the QR code below:');
-      qrcode.generate(qr, { small: true });
     }
 
     if (connection === 'close') {
