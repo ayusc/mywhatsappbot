@@ -49,23 +49,20 @@ export default {
     const lang = args[0] || 'eng';
 
     const mediaBuffer = await downloadMediaMessage(
-            quoted,
-            'buffer',
-            { },
-            { 
-                logger,
-                reuploadRequest: sock.updateMediaMessage
-            }
-    )
+    { message: { imageMessage: quoted.imageMessage } }, 
+    'buffer', 
+    {}, 
+    { logger }
+    );
 
     if (!mediaBuffer) {
       await sock.sendMessage(sender, { text: 'Failed to download image from message.' }, { quoted: msg });
       return;
     }
-
-    const tempPath = path.join('./', `ocr-temp-${Date.now()}.jpg`);
+    
+    const tempPath = path.join('./', `ocr.jpg`);
     writeFileSync(tempPath, mediaBuffer);
-
+    
     const formData = new FormData();
     formData.append('apikey', OCR_SPACE_API_KEY);
     formData.append('language', lang);
@@ -73,12 +70,9 @@ export default {
     formData.append('detectOrientation', 'true');
     formData.append('isOverlayRequired', 'false');
     formData.append('scale', 'true');
-    formData.append('file', mediaBuffer, {
-      filename: 'image.jpg',
-      contentType: 'image/jpeg'
-    });
+    formData.append('file', createReadStream(tempPath));
 
-    const waiting = await sock.sendMessage(sender, { text: `Processing image using language "${lang}"...` }, { quoted: msg });
+    await sock.sendMessage(sender, { text: `Processing image using language "${lang}"...` }, { quoted: msg });
 
     try {
       const response = await fetch('https://api.ocr.space/parse/image', {
