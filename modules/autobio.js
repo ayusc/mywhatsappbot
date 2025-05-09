@@ -53,7 +53,7 @@ export default {
   usage:
     'Type .autobio in any chat to start updating WhatsApp "About" with motivational quotes every X seconds (default 60s)',
 
-async execute(msg, _args, sock) {
+  async execute(msg, _args, sock) {
   const AUTO_BIO_INTERVAL = parseInt(process.env.AUTO_BIO_INTERVAL_MS, 10) || 60000;
   const jid = msg.key.remoteJid;
 
