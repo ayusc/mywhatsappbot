@@ -38,7 +38,7 @@ const intervalMs =
   Number.parseInt(process.env.AUTO_DP_INTERVAL_MS, 10) || 60_000;
 const SHOW_HOROSCOPE = process.env.SHOW_HOROSCOPE || 'False';
 
-export let autodpInterval = null;
+globalThis.autodpInterval = globalThis.autodpInterval || null;
 const fontPath = path.join(__dirname, 'Lobster-Regular.ttf');
 const fontUrl =
   'https://raw.githubusercontent.com/google/fonts/main/ofl/lobster/Lobster-Regular.ttf';
@@ -323,11 +323,11 @@ export default {
   async execute(message, arguments_, sock) {
     
     if (message.fromStartup) {
-      if (autodpInterval) {
+      if (globalThis.autodpInterval) {
         return;
       }
     } else {
-      if (autodpInterval) {
+      if (globalThis.autodpInterval) {
         await sock.sendMessage(message.key.remoteJid, { text: 'AutoDP is already running!' }, { quoted: message });
         return;
       }
@@ -344,7 +344,7 @@ export default {
     const millisUntilNextInterval = intervalMs - (now % intervalMs);
 
     setTimeout(() => {
-      autodpInterval = setInterval(async () => {
+      globalThis.autodpInterval = setInterval(async () => {
         await generateImage();
         const buffer = fs.readFileSync(outputImage);
         await sock.updateProfilePicture(message.key.participant || message.key.remoteJid, buffer);
