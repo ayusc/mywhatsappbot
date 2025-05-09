@@ -37,16 +37,24 @@ let autoBioStarted = false;
 const mongoUri = process.env.MONGO_URI;
 const authDir = './wahbuddy-auth';
 const dbName = 'wahbuddy';
-let db, sessionCollection;
-let sockInstance = null;
+let db, sessionCollection, sockInstance;
 const app = express();
 const PORT = process.env.PORT || 8000;
 const SITE_URL = process.env.SITE_URL;
 
+const debounce = (fn, delay) => {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
+  };
+};
+
 async function saveAuthStateToMongo(attempt = 1) {
   try {
     if (!fs.existsSync(authDir)) {
-      throw new Error(`${authDir} does not exist`);
+      console.warn(`${authDir} does not exist. Skipping save.`);
+      return;
     }
 
     const staging = db.collection('wahbuddy_sessions_staging');
@@ -96,8 +104,9 @@ async function restoreAuthStateFromMongo() {
     console.log(`Found WahBuddy's session entries in MongoDB !`);
   }
 
+  fs.mkdirSync(authDir, { recursive: true });
+
   for (const { _id, data } of savedCreds) {
-    fs.mkdirSync(authDir, { recursive: true });
     const filePath = path.join(authDir, _id);
     fs.writeFileSync(filePath, data, 'utf-8');
   }
@@ -112,9 +121,8 @@ async function startBot() {
   sessionCollection = db.collection('wahbuddy_sessions');
   console.log('Connected to MongoDB');
 
-  if (fs.existsSync(authDir)) {
-    fs.rmSync(authDir, { recursive: true, force: true });
-  }
+  // Ensure authDir exists
+  fs.mkdirSync(authDir, { recursive: true });
 
   await restoreAuthStateFromMongo();
 
@@ -122,19 +130,19 @@ async function startBot() {
   const { version } = await fetchLatestBaileysVersion();
 
   const sock = makeWASocket({
-    version: version,
+    version,
     auth: state,
     browser: Browsers.macOS("Google Chrome"),
     logger: pino({ level: 'silent' })
   });
-  
+
   sockInstance = sock;
 
-  sock.ev.on('creds.update', async () => {
+  sock.ev.on('creds.update', debounce(async () => {
     await saveCreds();
     await saveAuthStateToMongo();
-  });
-
+  }, 1000));
+  
   const commands = new Map();
   const modulesPath = path.join(__dirname, 'modules');
   const moduleFiles = fs.readdirSync(modulesPath).filter(file => file.endsWith('.js'));
