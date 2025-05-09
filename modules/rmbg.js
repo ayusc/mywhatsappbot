@@ -19,6 +19,8 @@ import dotenv from 'dotenv';
 import FormData from 'form-data';
 import { writeFileSync, unlinkSync, createReadStream } from 'fs';
 import path from 'path';
+import pino from 'pino';
+const logger = pino();
 import { downloadMediaMessage } from 'baileys';
 
 dotenv.config();
