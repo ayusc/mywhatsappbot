@@ -17,7 +17,7 @@
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import FormData from 'form-data';
-import { writeFileSync, unlinkSync, createReadStream } from 'fs';
+import fs from 'fs';
 import path from 'path';
 import pino from 'pino';
 const logger = pino();
@@ -59,7 +59,7 @@ export default {
 
     const tempInputPath = path.join('./', `rmbg-input.png`);
     const tempOutputPath = path.join('./', `rmbg-output.png`);
-    writeFileSync(tempInputPath, imageBuffer);
+    fs.writeFileSync(tempInputPath, imageBuffer);
 
     try {
       const formData = new FormData();
@@ -81,7 +81,7 @@ export default {
       }
 
       const buffer = await response.buffer();
-      writeFileSync(tempOutputPath, buffer);
+      fs.writeFileSync(tempOutputPath, buffer);
 
       const messageOptions = {
         image: { url: tempOutputPath },
@@ -92,8 +92,8 @@ export default {
     } catch (err) {
       await sock.sendMessage(sender, { text: 'Failed to remove background from the image.' }, { quoted: msg });
     } finally {
-      if (fs.existsSync(tempInputPath)) unlinkSync(tempInputPath);
-      if (fs.existsSync(tempOutputPath)) unlinkSync(tempOutputPath);
+      if (fs.existsSync(tempInputPath)) fs.unlinkSync(tempInputPath);
+      if (fs.existsSync(tempOutputPath)) fs.unlinkSync(tempOutputPath);
     }
   }
 };
