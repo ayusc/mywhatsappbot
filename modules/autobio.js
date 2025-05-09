@@ -19,7 +19,6 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-let interval = null;
 let lastQuote = '';
 
 async function runQuoteUpdate() {
@@ -59,11 +58,11 @@ export default {
     const jid = msg.key.remoteJid;
 
     if (msg.fromStartup) {
-      if (interval) {
+      if (globalThis.autobioInterval) {
         return; 
       }
     } else {
-      if (interval) {
+      if (globalThis.autobioInterval) {
         await sock.sendMessage(jid, { text: 'AutoBio is already running!' }, { quoted: msg });
         return;
       }
@@ -90,7 +89,7 @@ export default {
         }
       }
 
-      interval = setInterval(async () => {
+      globalThis.autobioInterval = setInterval(async () => {
         const q = await runQuoteUpdate();
         if (q) {
           try {
@@ -105,5 +104,4 @@ export default {
   },
 };
 
-export { interval as autobioInterval };
-
+export { globalThis.autobioInterval };
