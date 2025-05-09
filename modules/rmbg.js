@@ -17,8 +17,9 @@
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import FormData from 'form-data';
-import { writeFileSync, unlinkSync } from 'fs';
+import { writeFileSync, unlinkSync, createReadStream } from 'fs';
 import path from 'path';
+import { downloadMediaMessage } from 'baileys';
 
 dotenv.config();
 
@@ -42,25 +43,27 @@ export default {
       return;
     }
 
-    const imageBuffer = await sock.downloadMediaMessage({ message: quoted });
+    const imageBuffer = await downloadMediaMessage(
+    { message: { imageMessage: quoted.imageMessage } }, 
+    'buffer', 
+    {}, 
+    { logger }
+    );
 
     if (!imageBuffer) {
       await sock.sendMessage(sender, { text: 'Failed to download the image.' }, { quoted: msg });
       return;
     }
 
-    const tempInputPath = path.join('./', `rmbg-input-${Date.now()}.png`);
-    const tempOutputPath = path.join('./', `rmbg-output-${Date.now()}.png`);
+    const tempInputPath = path.join('./', `rmbg-input.png`);
+    const tempOutputPath = path.join('./', `rmbg-output.png`);
     writeFileSync(tempInputPath, imageBuffer);
 
     try {
       const formData = new FormData();
-      formData.append('image_file', imageBuffer, {
-        filename: 'image.png',
-        contentType: 'image/png',
-      });
+      formData.append('image_file', fs.createReadStream(tempInputPath));
       formData.append('scale', '100%');
-
+      
       const response = await fetch('https://api.remove.bg/v1.0/removebg', {
         method: 'POST',
         headers: {
