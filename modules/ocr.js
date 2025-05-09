@@ -17,7 +17,7 @@
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import FormData from 'form-data';
-import { writeFileSync, unlinkSync } from 'fs';
+import { writeFileSync, unlinkSync, createReadStream } from 'fs';
 import path from 'path';
 import pino from 'pino';
 const logger = pino();
