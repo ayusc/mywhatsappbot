@@ -31,8 +31,6 @@ export default {
 
     const timeTaken = ((Date.now() - start) / 1000).toFixed(3);
 
-    await new Promise(resolve => setTimeout(resolve, 500));
-
     await sock.sendMessage(
       jid,
       {
