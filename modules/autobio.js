@@ -30,11 +30,11 @@ async function runQuoteUpdate() {
     while (!quote || quote.length > 139 || quote === lastQuote) {
       const res = await fetch('https://quotes-api-self.vercel.app/quote');
       const data = await res.json();
-      quote = `${data.quote} —${data.author}`;
+      quote = data.quote;
       attempts++;
 
       if (attempts >= 10) {
-        console.warn('Failed to find a new short quote after 10 attempts. Skipping...');
+        console.warn('Failed to find a new quote after 10 attempts. Skipping...');
         return null;
       }
     }
@@ -94,7 +94,7 @@ export default {
         const q = await runQuoteUpdate();
         if (q) {
           try {
-            await sock.updateProfileStatus(q); // update profile "About"
+            await sock.updateProfileStatus(q); 
             console.log('About updated');
           } catch (error) {
             console.error('Failed to update About:', error.message);
