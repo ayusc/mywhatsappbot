@@ -103,5 +103,3 @@ export default {
     }, delay);
   },
 };
-
-export { globalThis.autobioInterval };
