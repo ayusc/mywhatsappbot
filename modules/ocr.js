@@ -84,14 +84,14 @@ export default {
 
       if (result.IsErroredOnProcessing) {
         const errorText = result.ErrorMessage?.[0] || 'OCR processing failed.';
-        await sock.sendMessage(sender, { text: `Error: ${errorText}` }, { quoted: msg }, {edit: sent.key });
+        await sock.sendMessage(sender, { text: `Error: ${errorText}`, edit: sent.key });
       } else {
         const parsedText = result.ParsedResults?.[0]?.ParsedText?.trim();
         const finalText = parsedText ? `OCR Result:\n\n${parsedText}` : 'No readable text found in the image.';
-        await sock.sendMessage(sender, { text: finalText }, { quoted: msg }, {edit: sent.key });
+        await sock.sendMessage(sender, { text: finalText,  edit: sent.key });
       }
     } catch (err) {
-      await sock.sendMessage(sender, { text: 'OCR failed to process the image.' }, { quoted: msg }, {edit: sent.key });
+      await sock.sendMessage(sender, { text: 'OCR failed to process the image.', edit: sent.key });
     } finally {
       unlinkSync(tempPath);
     }
