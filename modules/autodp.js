@@ -321,18 +321,20 @@ export default {
     'Type .autodp in any chat to start updating WhatsApp Profile Picture with clock, current temperature and horoscope every X seconds',
 
   async execute(message, arguments_, sock) {
-    
-    if (message.fromStartup) {
-      if (globalThis.autodpInterval) {
-        return;
-      }
-    } else {
-      if (globalThis.autodpInterval) {
-        await sock.sendMessage(message.key.remoteJid, { text: 'AutoDP is already running!' }, { quoted: message });
-        return;
-      }
+    const jid = message.key.remoteJid;
+    const intervalMs = parseInt(process.env.AUTO_DP_INTERVAL_MS, 10) || 60000;
 
-      await sock.sendMessage(message.key.remoteJid, {
+    if (globalThis.autodpRunning) {
+      if (!message.fromStartup) {
+        await sock.sendMessage(jid, { text: 'AutoDP is already running!' }, { quoted: message });
+      }
+      return;
+    }
+
+    globalThis.autodpRunning = true;
+
+    if (!message.fromStartup) {
+      await sock.sendMessage(jid, {
         text: `AutoDP started.\nUpdating every ${intervalMs / 1000}s`
       }, { quoted: message });
     }
@@ -343,22 +345,22 @@ export default {
     const now = Date.now();
     const millisUntilNextInterval = intervalMs - (now % intervalMs);
 
-    setTimeout(() => {
-      globalThis.autodpInterval = setInterval(async () => {
+    globalThis.autodpInterval = setInterval(async () => {
+      await generateImage();
+      const buffer = fs.readFileSync(outputImage);
+      await sock.updateProfilePicture(message.key.participant || jid, buffer);
+      console.log('DP updated');
+    }, intervalMs);
+
+    setTimeout(async () => {
+      try {
         await generateImage();
         const buffer = fs.readFileSync(outputImage);
-        await sock.updateProfilePicture(message.key.participant || message.key.remoteJid, buffer);
+        await sock.updateProfilePicture(message.key.participant || jid, buffer);
         console.log('DP updated');
-      }, intervalMs);
-
-      generateImage()
-        .then(async () => {
-          const buffer = fs.readFileSync(outputImage);
-          await sock.updateProfilePicture(message.key.participant || message.key.remoteJid, buffer);
-          console.log('DP updated');
-        })
-        .catch(() => {});
+      } catch (error) {
+        console.error('Initial DP update failed:', error.message);
+      }
     }, millisUntilNextInterval);
   }
 };
-
